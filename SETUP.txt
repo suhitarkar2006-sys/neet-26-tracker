@@ -1,0 +1,15 @@
+NEET 26 ONLINE TRACKER — FINAL SETUP
+
+1. Create a free Supabase project: https://supabase.com/
+2. In Supabase: SQL Editor -> New query -> paste supabase.sql -> Run.
+3. Supabase: Project Settings -> API. Copy Project URL and Publishable/anon key.
+4. In GitHub, open index.html -> Edit. Replace:
+   PASTE_YOUR_SUPABASE_URL_HERE
+   PASTE_YOUR_SUPABASE_ANON_KEY_HERE
+   with your values. Commit changes.
+5. Enable GitHub Pages: repository Settings -> Pages -> Deploy from branch -> main -> /(root) -> Save.
+6. Your site will be:
+   https://suhitarkar2006-sys.github.io/neet-26-tracker/
+7. Open it and create your account.
+
+IMPORTANT: Never put the Supabase service_role/secret key in index.html. Use only the publishable/anon key with Row Level Security enabled.
