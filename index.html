@@ -11,7 +11,7 @@
 <script>
 const TASKS=["Wake on time","Morning revision","Allen class attended properly","Physics same-day revision","Chemistry same-day revision","Biology NCERT","Biology questions","Physics questions","Chemistry questions","Error book updated","Light revision","No Instagram / endless scrolling","Sleep on time"];
 const MIN="2026-09-01",MAX="2027-04-30";
-const SUPABASE_URL="PASTE_YOUR_SUPABASE_URL_HERE",SUPABASE_ANON_KEY="PASTE_YOUR_SUPABASE_ANON_KEY_HERE";
+const SUPABASE_URL="https://dmrgvhfvnxbcrvvqidfa.supabase.co",SUPABASE_ANON_KEY="sb_publishable_qTNwWRR7wObbS4e_vcheaA_4_4oGgc-";
 const configured=SUPABASE_URL.startsWith("https://")&&!SUPABASE_ANON_KEY.startsWith("PASTE_");const sb=configured?supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const $=id=>document.getElementById(id),date=$("date");let records={},user=null;
 let now=new Date(),initial=now.toISOString().slice(0,10);if(initial<MIN)initial=MIN;if(initial>MAX)initial=MAX;date.value=initial;
