@@ -704,12 +704,39 @@ async function loadExams(){
   }
   let remote={};
   (data||[]).forEach(r=>remote[r.exam_id]=r);
-  // Never erase a locally cached score just because Supabase returned an empty/partial response.
+
+  // Local cache is a recovery source, never something that should be wiped by a
+  // temporarily empty/partial Supabase response.
   examRecords=Object.assign({},cached,remote);
-  if(Object.keys(examRecords).length) localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords));
-  $("saveStatus").textContent=Object.keys(remote).length
-    ?Object.keys(remote).length+" Aakash exam"+(Object.keys(remote).length===1?"":"s")+" loaded ✓"
-    :(Object.keys(cached).length?"Aakash scores restored from saved backup ✓":"No Aakash scores saved yet.");
+
+  // If Supabase has lost the cached records, try restoring them automatically.
+  let cachedIds=Object.keys(cached);
+  let missing=cachedIds.filter(id=>!remote[id]);
+  if(missing.length){
+    let restorePayload=missing.map(id=>Object.assign({},cached[id],{
+      user_id:user.id,
+      exam_id:id,
+      updated_at:new Date().toISOString()
+    }));
+    let{error:restoreError}=await sb.from("exam_results").upsert(restorePayload,{onConflict:"user_id,exam_id"});
+    if(!restoreError){
+      restorePayload.forEach(r=>remote[r.exam_id]=r);
+      $("saveStatus").textContent=missing.length+" saved Aakash exam"+(missing.length===1?"":"s")+" restored online ✓";
+    }else{
+      $("saveStatus").textContent=Object.keys(examRecords).length
+        ?"Aakash scores restored from browser backup ✓ (online restore pending)"
+        :"Aakash scores couldn't be restored.";
+    }
+  }
+
+  if(Object.keys(examRecords).length){
+    try{localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords))}catch(e){}
+  }
+  if(!missing.length){
+    $("saveStatus").textContent=Object.keys(remote).length
+      ?Object.keys(remote).length+" Aakash exam"+(Object.keys(remote).length===1?"":"s")+" loaded ✓"
+      :(Object.keys(cached).length?"Aakash scores restored from saved backup ✓":"No Aakash scores saved yet.");
+  }
   renderExams();
 }
 function renderExams(){let rows=$("examRows");if(!rows)return;rows.innerHTML="";let list=EXAMS.filter(e=>examFilter==="all"||hasExamResult(examRecords[e[0]]));EXAMS.forEach(e=>{if(!(examFilter==="all"||hasExamResult(examRecords[e[0]])))return;let r=examRecords[e[0]],m=r?examMetrics(r):null;let tr=document.createElement("tr");if(m)tr.className="hasResult";tr.innerHTML=`<td><span class="examName">${escHtml(e[0])}</span></td><td>${fmtExamDate(e[1])}</td><td>${m?.scores[0]??"—"}</td><td>${m?.scores[1]??"—"}</td><td>${m?.scores[2]??"—"}</td><td>${m?.scores[3]??"—"}</td><td class="score">${m?.total??"—"}</td><td>${m?.correct??"—"}</td><td>${m?.wrong??"—"}</td><td>${m?m.missed:"—"}</td><td>${m?m.attempted:"—"}</td><td>${m?.accuracy!=null?m.accuracy.toFixed(1)+"%":"—"}</td><td>${r?.rank??"—"}</td><td><button class="examBtn" type="button" data-exam="${escHtml(e[0])}">${m?"Edit":"Enter"}</button></td>`;rows.append(tr)});rows.querySelectorAll("button[data-exam]").forEach(b=>b.onclick=()=>openExam(b.dataset.exam));let completed=EXAMS.filter(e=>hasExamResult(examRecords[e[0]])).map(e=>({e,r:examRecords[e[0]],m:examMetrics(examRecords[e[0]])}));$("examCount").textContent=completed.length+" / "+EXAMS.length;if(completed.length){let vals=completed.map(x=>x.m.total),avg=vals.reduce((a,b)=>a+b,0)/vals.length;$("examAvg").textContent=Math.round(avg);$("examHigh").textContent=Math.max(...vals);$("examLatest").textContent=completed[completed.length-1].m.total}else{$("examAvg").textContent=$("examHigh").textContent=$("examLatest").textContent="—"}if(typeof renderCommandCenter==="function")renderCommandCenter()}
