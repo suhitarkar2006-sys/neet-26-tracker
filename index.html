@@ -66,6 +66,55 @@ body{background-color:#eef2f8;background-image:radial-gradient(circle at 12% 8%,
 }
 @media(max-width:520px){.dashboardHero{padding:16px}.dashboardHero h1{font-size:24px}.heroEyebrow{font-size:9px}.heroSub{font-size:11px}.heroActions{gap:5px}.heroLogout{padding:7px 10px!important}.stats .card{padding:13px}.calendar{padding:11px}.day{min-height:43px}.timerButtons button{min-width:0}.mobileNav button{min-width:56px;padding:5px 6px}}
 .nightTheme .dashboardHero{background:linear-gradient(135deg,rgba(18,28,48,.94),rgba(21,36,64,.86))!important;border-color:#263650!important}.nightTheme .mobileNav{background:rgba(12,22,38,.92);border-color:#263650}.nightTheme .mobileNav button,.nightTheme .mobileNav button span{color:#dce6f7}
+</style><style id="transparent-checklist-calendar">
+/* Transparent checklist + calendar: let the AIIMS background show through */
+.panel,.calendar{
+  background:rgba(255,255,255,.20)!important;
+  backdrop-filter:blur(14px)!important;
+  -webkit-backdrop-filter:blur(14px)!important;
+  border:1px solid rgba(255,255,255,.38)!important;
+  box-shadow:0 12px 32px rgba(15,23,42,.08)!important;
+}
+.row{
+  background:rgba(255,255,255,.10)!important;
+  border-bottom-color:rgba(255,255,255,.24)!important;
+}
+.row.done{
+  background:rgba(220,242,229,.30)!important;
+}
+.calendar .day{
+  background:rgba(255,255,255,.16)!important;
+  border-color:rgba(255,255,255,.34)!important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.calendar .day.done{
+  background:rgba(158,210,173,.38)!important;
+  border-color:rgba(126,184,145,.55)!important;
+}
+.calendar .day.partial{
+  background:rgba(255,220,125,.30)!important;
+  border-color:rgba(234,210,124,.55)!important;
+}
+.calendar .day.selected{
+  background:rgba(49,89,183,.20)!important;
+}
+.calendar .day.empty{
+  background:transparent!important;
+  border-color:transparent!important;
+}
+.nightTheme .panel,.nightTheme .calendar{
+  background:rgba(18,28,48,.42)!important;
+  border-color:rgba(83,105,140,.45)!important;
+}
+.nightTheme .row{
+  background:rgba(18,28,48,.28)!important;
+  border-bottom-color:rgba(83,105,140,.35)!important;
+}
+.nightTheme .row.done{background:rgba(22,60,41,.42)!important}
+.nightTheme .calendar .day{background:rgba(17,29,49,.35)!important;border-color:rgba(83,105,140,.45)!important}
+.nightTheme .calendar .day.done{background:rgba(22,60,41,.50)!important}
+.nightTheme .calendar .day.partial{background:rgba(105,83,24,.38)!important}
 </style></head>
 <body>
 <div id="auth" class="auth"><h2>NEET 27 Tracker</h2><p class="muted">Your checklist syncs online across devices.</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password (6+ characters)"><button id="signup" class="primary">Create account</button><button id="signin">Sign in</button><button id="forgot" type="button">Forgot password?</button><div id="resetBox" class="hidden"><p class="muted" style="margin-bottom:8px">Choose a new password</p><input id="newPassword" type="password" placeholder="New password (6+ characters)"><button id="updatePassword" class="primary">Set new password</button><button id="cancelReset" type="button">Cancel</button></div><div id="authMsg" class="msg"></div></div>
