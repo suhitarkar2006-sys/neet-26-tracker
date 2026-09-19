@@ -152,7 +152,350 @@ body{background-color:#eef2f8;background-image:radial-gradient(circle at 12% 8%,
 .openingTitle{font-size:27px;font-weight:900;letter-spacing:-.03em;color:#fff}
 .openingSub{margin-top:8px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#b9c9e8}
 .openingLine{height:2px;width:180px;margin:18px auto 0;background:rgba(255,255,255,.75)}
-@media(prefers-reduced-motion:reduce){.openingScreen{animation:none;display:none}.scrollReveal{opacity:1;transform:none}}</style></head>
+@media(prefers-reduced-motion:reduce){.openingScreen{animation:none;display:none}.scrollReveal{opacity:1;transform:none}}</style>
+<style id="premium-motion-upgrade">
+/* Premium Motion Upgrade — subtle Apple/Linear-style motion */
+:root{
+  --motion-ease:cubic-bezier(.22,1,.36,1);
+  --spot-x:50vw;
+  --spot-y:35vh;
+}
+html{scroll-behavior:smooth}
+body{
+  position:relative;
+  min-height:100vh;
+  overflow-x:hidden;
+  background-color:#eef2f8;
+}
+body:before,body:after{
+  content:"";
+  position:fixed;
+  z-index:-2;
+  pointer-events:none;
+  border-radius:50%;
+  filter:blur(10px);
+  opacity:.7;
+}
+body:before{
+  width:420px;height:420px;
+  left:-170px;top:12vh;
+  background:radial-gradient(circle,rgba(93,126,224,.18),transparent 68%);
+  animation:ambientDriftA 14s ease-in-out infinite;
+}
+body:after{
+  width:360px;height:360px;
+  right:-130px;bottom:8vh;
+  background:radial-gradient(circle,rgba(75,181,145,.14),transparent 68%);
+  animation:ambientDriftB 17s ease-in-out infinite;
+}
+.app:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:radial-gradient(
+    520px circle at var(--spot-x) var(--spot-y),
+    rgba(255,255,255,.30),
+    transparent 65%
+  );
+  transition:background .18s ease;
+}
+
+/* Glass depth + moving highlight */
+.card,.ccCard,.timerCard,.upgradeCard,.futureDoctorCard,.panel,.calendar,.examTable,.dashboardHero{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+}
+.card:before,.ccCard:before,.timerCard:before,.upgradeCard:before,
+.futureDoctorCard:before,.panel:before,.calendar:before,.dashboardHero:before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  pointer-events:none;
+  z-index:-1;
+  background:linear-gradient(
+    120deg,
+    rgba(255,255,255,.38),
+    transparent 34%,
+    transparent 66%,
+    rgba(255,255,255,.16)
+  );
+  opacity:.7;
+}
+.card,.ccCard,.timerCard,.upgradeCard,.futureDoctorCard{
+  transform:translateZ(0);
+  transition:
+    transform .35s var(--motion-ease),
+    box-shadow .35s var(--motion-ease),
+    border-color .35s ease,
+    background .35s ease;
+}
+.card:hover,.ccCard:hover,.timerCard:hover,.upgradeCard:hover,.futureDoctorCard:hover{
+  transform:translateY(-4px);
+  box-shadow:0 20px 48px rgba(20,40,80,.14);
+  border-color:rgba(255,255,255,.95);
+}
+
+/* Header polish */
+.dashboardHero{
+  transition:transform .45s var(--motion-ease),box-shadow .45s var(--motion-ease);
+}
+.dashboardHero:hover{
+  transform:translateY(-2px);
+  box-shadow:0 24px 65px rgba(25,45,85,.18);
+}
+.heroEyebrow{animation:eyebrowIn .7s var(--motion-ease) both}
+.dashboardHero h1{animation:heroTextIn .75s .06s var(--motion-ease) both}
+.heroSub{animation:heroTextIn .75s .12s var(--motion-ease) both}
+.heroActions{animation:heroTextIn .75s .18s var(--motion-ease) both}
+
+/* Button micro-interactions */
+button{
+  position:relative;
+  overflow:hidden;
+  transition:transform .18s var(--motion-ease),box-shadow .22s ease,filter .18s ease,background .22s ease;
+}
+button:after{
+  content:"";
+  position:absolute;
+  top:-80%;
+  left:-70%;
+  width:45%;
+  height:260%;
+  transform:rotate(22deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);
+  opacity:0;
+  transition:left .55s var(--motion-ease),opacity .2s ease;
+  pointer-events:none;
+}
+button:hover:not(:disabled):after{left:125%;opacity:1}
+button:hover:not(:disabled){transform:translateY(-2px) scale(1.01)}
+button:active:not(:disabled){transform:translateY(0) scale(.975)}
+.primary{
+  box-shadow:0 8px 20px rgba(49,89,183,.18);
+}
+
+/* Inputs */
+input:focus{
+  outline:none;
+  border-color:rgba(49,89,183,.55)!important;
+  box-shadow:0 0 0 4px rgba(49,89,183,.10),0 8px 22px rgba(20,40,80,.07);
+  transform:translateY(-1px);
+}
+input{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+
+/* Checklist satisfaction */
+.row{
+  position:relative;
+}
+.row input{
+  cursor:pointer;
+  transition:transform .2s var(--motion-ease),filter .2s ease;
+}
+.row input:checked{
+  transform:scale(1.12);
+  filter:drop-shadow(0 2px 5px rgba(49,89,183,.25));
+}
+.row.done .task{animation:taskDone .28s var(--motion-ease) both}
+.row.justCompleted{animation:rowComplete .7s ease}
+
+/* Progress shimmer */
+.progress,.targetProgress,.miniBar{position:relative}
+.progress .fill,.targetProgress i,.miniBar i{position:relative;overflow:hidden}
+.progress .fill:after,.targetProgress i:after,.miniBar i:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+  transform:translateX(-100%);
+  animation:barShimmer 2.6s ease-in-out infinite;
+}
+
+/* Calendar */
+.day:not(.empty){
+  transition:transform .22s var(--motion-ease),box-shadow .22s ease,background .22s ease,border-color .22s ease;
+}
+.day:not(.empty):hover{
+  transform:translateY(-4px) scale(1.02);
+  box-shadow:0 9px 20px rgba(20,40,80,.14);
+}
+.day.selected{
+  animation:selectedDayPulse 2.2s ease-in-out infinite;
+}
+
+/* Section titles */
+.ccCard h2,.examTop h2,.upgradeCard h3{
+  letter-spacing:-.02em;
+}
+.ccCard h2:after,.examTop h2:after{
+  content:"";
+  display:block;
+  width:34px;
+  height:2px;
+  margin-top:7px;
+  border-radius:99px;
+  background:linear-gradient(90deg,#3159b7,transparent);
+  transform-origin:left;
+  animation:lineDraw .8s var(--motion-ease) both;
+}
+
+/* Score / stat emphasis */
+.big,.ccBig,.targetDistance,.timerValue{
+  transition:transform .25s var(--motion-ease),text-shadow .25s ease;
+}
+.card:hover .big,.ccCard:hover .ccBig,.upgradeCard:hover .targetDistance{
+  transform:translateY(-1px);
+  text-shadow:0 5px 20px rgba(49,89,183,.12);
+}
+.examScoreChanged{animation:scoreCount .45s ease both}
+
+/* Tables */
+.examTable tbody tr{
+  transition:background .2s ease,transform .2s ease,box-shadow .2s ease;
+}
+.examTable tbody tr:hover{
+  background:rgba(255,255,255,.55);
+  box-shadow:inset 4px 0 0 rgba(49,89,183,.5);
+}
+.resultMini,.subjectStat,.subjectBox,.record,.badge{
+  transition:transform .22s var(--motion-ease),box-shadow .22s ease,border-color .22s ease;
+}
+.resultMini:hover,.subjectStat:hover,.subjectBox:hover,.record:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 22px rgba(20,40,80,.10);
+  border-color:rgba(49,89,183,.20);
+}
+.badge:hover{transform:translateY(-2px) scale(1.02)}
+
+/* Study timer active state */
+.timerActiveGlow{
+  box-shadow:0 16px 48px rgba(49,89,183,.18)!important;
+}
+.timerButtons #studyStart,.timerButtons #studyResume{
+  box-shadow:0 8px 20px rgba(25,135,84,.12);
+}
+
+/* Mobile nav: floating glass pill + active indicator */
+.mobileNav{
+  transition:transform .35s var(--motion-ease),box-shadow .35s ease;
+}
+.mobileNav button{
+  position:relative;
+  transition:transform .2s var(--motion-ease),background .2s ease,color .2s ease;
+}
+.mobileNav button:before{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:3px;
+  width:5px;height:5px;
+  border-radius:50%;
+  background:#3159b7;
+  transform:translateX(-50%) scale(0);
+  transition:transform .2s var(--motion-ease);
+}
+.mobileNav button.active{
+  background:rgba(49,89,183,.10)!important;
+}
+.mobileNav button.active:before{transform:translateX(-50%) scale(1)}
+.mobileNav button.active span{color:#3159b7}
+
+/* Modal spring */
+.examModal{
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+.examModalBox{
+  animation:modalSpring .45s var(--motion-ease) both;
+  box-shadow:0 28px 90px rgba(5,18,45,.26);
+}
+.examModal:not(.hidden){animation:modalBackdrop .25s ease both}
+
+/* Dream mode */
+.dreamOrb{
+  animation:dreamOrbFloat 3.2s ease-in-out infinite, dreamOrbGlow 2.6s ease-in-out infinite alternate;
+}
+.dreamBox h2{animation:dreamText .8s .05s both}
+.dreamQuote{animation:dreamText .8s .14s both}
+.dreamBox p{animation:dreamText .8s .22s both}
+
+/* New reveal behavior */
+.motionReveal{opacity:0;transform:translateY(18px) scale(.985)}
+.motionReveal.motionVisible{opacity:1;transform:none;transition:opacity .7s ease,transform .7s var(--motion-ease)}
+.motionReveal:nth-child(2){transition-delay:.04s}
+.motionReveal:nth-child(3){transition-delay:.08s}
+.motionReveal:nth-child(4){transition-delay:.12s}
+
+/* Keyframes */
+@keyframes ambientDriftA{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  50%{transform:translate3d(55px,35px,0) scale(1.08)}
+}
+@keyframes ambientDriftB{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  50%{transform:translate3d(-45px,-28px,0) scale(1.1)}
+}
+@keyframes eyebrowIn{
+  from{opacity:0;transform:translateY(-8px);letter-spacing:.28em}
+  to{opacity:1;transform:none;letter-spacing:.16em}
+}
+@keyframes heroTextIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+@keyframes taskDone{
+  0%{transform:translateX(0)}
+  45%{transform:translateX(4px)}
+  100%{transform:translateX(0)}
+}
+@keyframes barShimmer{
+  0%,45%{transform:translateX(-100%)}
+  70%,100%{transform:translateX(100%)}
+}
+@keyframes selectedDayPulse{
+  0%,100%{box-shadow:0 0 0 3px rgba(49,89,183,.13)}
+  50%{box-shadow:0 0 0 5px rgba(49,89,183,.06),0 7px 18px rgba(49,89,183,.10)}
+}
+@keyframes lineDraw{
+  from{transform:scaleX(0);opacity:0}
+  to{transform:scaleX(1);opacity:1}
+}
+@keyframes modalBackdrop{
+  from{opacity:0}
+  to{opacity:1}
+}
+@keyframes modalSpring{
+  0%{opacity:0;transform:translateY(18px) scale(.96)}
+  65%{opacity:1;transform:translateY(-3px) scale(1.005)}
+  100%{opacity:1;transform:none}
+}
+@keyframes dreamOrbFloat{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-9px) scale(1.035)}
+}
+@keyframes dreamOrbGlow{
+  from{filter:brightness(.95)}
+  to{filter:brightness(1.18)}
+}
+
+/* Keep motion elegant on small screens */
+@media(max-width:800px){
+  body:before,body:after{opacity:.45}
+  .card:hover,.ccCard:hover,.timerCard:hover,.upgradeCard:hover,.futureDoctorCard:hover{
+    transform:translateY(-2px);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  body:before,body:after,.dreamOrb{animation:none!important}
+  .card,.ccCard,.timerCard,.upgradeCard,.futureDoctorCard,
+  .dashboardHero,.day:not(.empty),button,input{transition:none!important}
+  .motionReveal{opacity:1!important;transform:none!important}
+}
+</style>
+</head>
 <body><div id="auth" class="auth"><h2>NEET 27 Tracker</h2><p class="muted">Your checklist syncs online across devices.</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password (6+ characters)"><button id="signup" class="primary">Create account</button><button id="signin">Sign in</button><button id="forgot" type="button">Forgot password?</button><div id="resetBox" class="hidden"><p class="muted" style="margin-bottom:8px">Choose a new password</p><input id="newPassword" type="password" placeholder="New password (6+ characters)"><button id="updatePassword" class="primary">Set new password</button><button id="cancelReset" type="button">Cancel</button></div><div id="authMsg" class="msg"></div></div>
 <div id="app" class="app hidden"><div class="motivationSticker" aria-label="Motivational note"><img src="aiims-sticker.svg" alt="Someday, this won't be a dream. It'll be Dr. Suhit Sarkar, AIIMS Rishikesh."></div><header class="dashboardHero"><div class="heroIdentity"><div class="heroEyebrow">🩺 NEET 2027</div><h1>Dr. Suhit Sarkar</h1><div class="heroSub">Daily Tracker <span>•</span> September 1, 2026 → April 30, 2027</div></div><div class="heroActions"><div class="heroAccount"><span id="userEmail" class="muted"></span></div><button id="logout" class="heroLogout">Log out</button></div></header>
 
@@ -366,4 +709,102 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
   window.journeyAnimateProgress=function(el){if(!el)return;el.classList.remove("sweeping");void el.offsetWidth;el.classList.add("sweeping");setTimeout(()=>el.classList.remove("sweeping"),750)};
   window.journeyAnimateElement=function(el,cls){if(!el)return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);};
 })();
-</script></body></html>
+</script>
+<script id="premium-motion-js">
+(function(){
+  function initPremiumMotion(){
+    /* Cursor-following ambient spotlight — desktop only */
+    if(window.matchMedia && window.matchMedia("(pointer:fine)").matches){
+      let raf=0;
+      document.addEventListener("pointermove",function(e){
+        if(raf)return;
+        raf=requestAnimationFrame(function(){
+          document.documentElement.style.setProperty("--spot-x",e.clientX+"px");
+          document.documentElement.style.setProperty("--spot-y",e.clientY+"px");
+          raf=0;
+        });
+      },{passive:true});
+    }
+
+    /* Add subtle reveal to major blocks not already handled by journey animation. */
+    const revealTargets=document.querySelectorAll(
+      ".dashboardHero,.stats .card,.studyTimer,.commandCenter>.ccCard,.futureDoctor,.upgradeGrid>.upgradeCard,.examSection,.allenExamSection"
+    );
+    if("IntersectionObserver" in window){
+      const io=new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            entry.target.classList.add("motionVisible");
+            io.unobserve(entry.target);
+          }
+        });
+      },{threshold:.08});
+      revealTargets.forEach(function(el){
+        if(!el.classList.contains("motionReveal"))el.classList.add("motionReveal");
+        io.observe(el);
+      });
+    }else{
+      revealTargets.forEach(function(el){el.classList.add("motionVisible")});
+    }
+
+    /* Highlight the mobile-nav destination currently in view. */
+    const navButtons=document.querySelectorAll(".mobileNav [data-scroll]");
+    const navTargets=[...navButtons]
+      .map(b=>b.dataset.scroll)
+      .filter(id=>id!=="top")
+      .map(id=>document.getElementById(id))
+      .filter(Boolean);
+    if("IntersectionObserver" in window && navTargets.length){
+      const navIO=new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            navButtons.forEach(function(btn){btn.classList.toggle("active",btn.dataset.scroll===entry.target.id)});
+          }
+        });
+      },{rootMargin:"-35% 0px -55% 0px",threshold:0});
+      navTargets.forEach(function(el){navIO.observe(el)});
+    }
+
+    /* Add a gentle active glow to the study timer while running. */
+    const timerValue=document.getElementById("studyTimerValue");
+    if(timerValue){
+      const timerCard=timerValue.closest(".timerCard");
+      const status=document.getElementById("studyTimerStatus");
+      const syncTimerGlow=function(){
+        const t=(status?.textContent||"").toLowerCase();
+        if(timerCard)timerCard.classList.toggle("timerActiveGlow",t.includes("running")||t.includes("resumed")||t.includes("started"));
+      };
+      if(status)new MutationObserver(syncTimerGlow).observe(status,{childList:true,subtree:true,characterData:true});
+      syncTimerGlow();
+    }
+
+    /* Give saved exam/result updates a tiny visual acknowledgement. */
+    document.addEventListener("click",function(e){
+      const id=e.target && e.target.id;
+      if(id==="saveExam"||id==="saveAllen"||id==="saveTargets"||id==="saveAllenTarget"){
+        setTimeout(function(){
+          document.querySelectorAll(".resultMini,.targetDistance,.subjectStat").forEach(function(el){
+            el.classList.remove("examScoreChanged");
+            void el.offsetWidth;
+            el.classList.add("examScoreChanged");
+          });
+        },120);
+      }
+    });
+
+    /* Keep mobile navigation polished when the user scrolls. */
+    let lastY=window.scrollY;
+    window.addEventListener("scroll",function(){
+      const nav=document.querySelector(".mobileNav");
+      if(!nav)return;
+      const y=window.scrollY;
+      nav.style.transform=(y>lastY && y>120)?"translateY(4px)":"translateY(0)";
+      lastY=y;
+    },{passive:true});
+  }
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initPremiumMotion);
+  else initPremiumMotion();
+})();
+</script>
+</body></html>
