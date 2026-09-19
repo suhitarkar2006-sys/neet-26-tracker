@@ -516,22 +516,21 @@ input{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
 @media(prefers-reduced-motion:reduce){.mountainClimber,.mountainClimber.up,.mountainClimber.down{animation:none!important;transition:none!important}}
 </style>
 <style id="login-video-background">
-#loginVideoBg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;overflow:hidden;background:#0b1220;opacity:1;visibility:visible;pointer-events:none}
-#loginVideoBg:before{content:"";position:absolute;inset:0;background-image:url('aiims-background.jpg');background-position:center center;background-size:cover;background-repeat:no-repeat;z-index:0}
-#loginVideoBg.active{opacity:1;visibility:visible}
-#loginVideoBg:after{content:"";position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(3,10,24,.20),rgba(3,10,24,.40)),linear-gradient(90deg,rgba(3,10,24,.10),rgba(3,10,24,.02),rgba(3,10,24,.14));transition:background .5s ease}
-#loginVideoBg video{position:absolute;left:0;top:0;width:100vw;height:100vh;min-width:100%;min-height:100%;display:block;object-fit:cover;object-position:center center;opacity:0;z-index:1;transition:opacity 1.15s ease;filter:saturate(.88) contrast(1.02)}
-#loginVideoBg video.active{opacity:.88}
-body.loginVideoMode{background:#0b1220!important}
-body.videoBackgroundMode{background:#0b1220 url('aiims-background.jpg') center/cover fixed no-repeat!important}
+#loginVideoBg{position:fixed;top:0;left:0;right:0;bottom:0;width:auto;height:auto;z-index:0;overflow:hidden;background:#0b1220;opacity:1;visibility:visible;pointer-events:none;isolation:isolate}
+#loginBgImage{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center center;z-index:0}
+#loginVideoBg video{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center center;opacity:0;z-index:1;transition:opacity 1.15s ease;filter:saturate(.88) contrast(1.02)}
+#loginVideoBg video.active{opacity:.90}
+#loginVideoBg:after{content:"";position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(3,10,24,.18),rgba(3,10,24,.38)),linear-gradient(90deg,rgba(3,10,24,.08),rgba(3,10,24,.02),rgba(3,10,24,.12));pointer-events:none}
+body.loginVideoMode,body.videoBackgroundMode{background:transparent!important;background-image:none!important}
 body.loginVideoMode #auth{position:relative;z-index:2;background:rgba(255,255,255,.76);box-shadow:0 18px 65px rgba(0,0,0,.28)}
 body.loginVideoMode #auth:before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,.08);pointer-events:none}
 body.loginVideoMode #auth>*{position:relative;z-index:1}
 body.videoBackgroundMode #app,body.videoBackgroundMode .app{position:relative;z-index:2}
-@media(max-width:700px){#loginVideoBg:after{background:linear-gradient(180deg,rgba(3,10,24,.24),rgba(3,10,24,.46))}body.loginVideoMode #auth{margin:28px auto}}
+@media(max-width:700px){#loginVideoBg:after{background:linear-gradient(180deg,rgba(3,10,24,.22),rgba(3,10,24,.44))}body.loginVideoMode #auth{margin:28px auto}}
 @media(prefers-reduced-motion:reduce){#loginVideoBg,#loginVideoBg video{transition:none!important}}
 </style></head>
 <body><div id="loginVideoBg" aria-hidden="true">
+<img id="loginBgImage" src="aiims-background.jpg" alt="">
 <video id="loginVideo1" muted playsinline preload="auto"></video>
 <video id="loginVideo2" muted playsinline preload="auto"></video>
 </div>
@@ -1077,10 +1076,11 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
 </script><script id="login-video-bg-js">
 (function(){
   const bg=document.getElementById("loginVideoBg");
+  const img=document.getElementById("loginBgImage");
   const v1=document.getElementById("loginVideo1");
   const v2=document.getElementById("loginVideo2");
   const auth=document.getElementById("auth");
-  if(!bg||!v1||!v2||!auth)return;
+  if(!bg||!img||!v1||!v2||!auth)return;
 
   v1.src="video1.mp4";
   v2.src="video2.mp4";
@@ -1090,14 +1090,19 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
   let current=0;
   let switching=false;
 
+  function playVideo(v){
+    try{v.muted=true;v.playsInline=true}catch(e){}
+    const p=v.play();
+    if(p&&p.catch)p.catch(function(){});
+  }
+
   function show(index){
     const next=index===0?v1:v2;
     const prev=index===0?v2:v1;
     switching=true;
     next.currentTime=0;
     next.classList.add("active");
-    const p=next.play();
-    if(p&&p.catch)p.catch(function(){});
+    playVideo(next);
     setTimeout(function(){
       prev.classList.remove("active");
       switching=false;
@@ -1105,33 +1110,28 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
     current=index;
   }
 
-  function next(){
+  function nextVideo(){
     if(switching)return;
     show(current===0?1:0);
   }
 
-  v1.addEventListener("ended",next);
-  v2.addEventListener("ended",next);
+  v1.addEventListener("ended",nextVideo);
+  v2.addEventListener("ended",nextVideo);
+  v1.addEventListener("error",function(){if(current===0)show(1)});
+  v2.addEventListener("error",function(){if(current===1)show(0)});
 
   function sync(){
     const loggedIn=auth.classList.contains("hidden");
     bg.classList.add("active");
     document.body.classList.add("videoBackgroundMode");
     document.body.classList.toggle("loginVideoMode",!loggedIn);
-    if(loggedIn){
-      v1.style.opacity=v1.classList.contains("active")?".38":"0";
-      v2.style.opacity=v2.classList.contains("active")?".38":"0";
-    }else{
-      v1.style.opacity="";
-      v2.style.opacity="";
-    }
     if(!v1.classList.contains("active")&&!v2.classList.contains("active"))show(0);
-    else{
-      const active=current===0?v1:v2;
-      const p=active.play();
-      if(p&&p.catch)p.catch(function(){});
-    }
+    else playVideo(current===0?v1:v2);
   }
+
+  document.addEventListener("visibilitychange",function(){
+    if(!document.hidden)playVideo(current===0?v1:v2);
+  });
 
   new MutationObserver(sync).observe(auth,{attributes:true,attributeFilter:["class"]});
   sync();
