@@ -691,18 +691,25 @@ function examMetrics(r){let ss=["physics","chemistry","botany","zoology"];let sc
 function hasExamResult(r){return !!r&&Object.keys(r).some(k=>k.endsWith("_correct")&&r[k]!=null)}
 async function loadExams(){
   $("saveStatus").textContent="Loading Aakash exams…";
+  let cached={};
+  try{cached=JSON.parse(localStorage.getItem("neet27_aakash_cache")||"{}")}catch(e){cached={}};
   let{data,error}=await sb.from("exam_results").select("*").eq("user_id",user.id).order("updated_at",{ascending:true});
   if(error){
-    let cached=localStorage.getItem("neet27_aakash_cache");
-    if(cached){try{examRecords=JSON.parse(cached)}catch(e){examRecords={}}}
-    $("saveStatus").textContent="Aakash scores couldn't be read from Supabase. Showing saved browser copy if available.";
+    examRecords=cached;
+    $("saveStatus").textContent=Object.keys(examRecords).length
+      ?"Aakash scores loaded from saved backup ✓"
+      :"Aakash scores couldn't be read from Supabase.";
     renderExams();
     return;
   }
-  examRecords={};
-  (data||[]).forEach(r=>examRecords[r.exam_id]=r);
-  localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords));
-  $("saveStatus").textContent=(data||[]).length+" Aakash exam"+((data||[]).length===1?"":"s")+" loaded ✓";
+  let remote={};
+  (data||[]).forEach(r=>remote[r.exam_id]=r);
+  // Never erase a locally cached score just because Supabase returned an empty/partial response.
+  examRecords=Object.assign({},cached,remote);
+  if(Object.keys(examRecords).length) localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords));
+  $("saveStatus").textContent=Object.keys(remote).length
+    ?Object.keys(remote).length+" Aakash exam"+(Object.keys(remote).length===1?"":"s")+" loaded ✓"
+    :(Object.keys(cached).length?"Aakash scores restored from saved backup ✓":"No Aakash scores saved yet.");
   renderExams();
 }
 function renderExams(){let rows=$("examRows");if(!rows)return;rows.innerHTML="";let list=EXAMS.filter(e=>examFilter==="all"||hasExamResult(examRecords[e[0]]));EXAMS.forEach(e=>{if(!(examFilter==="all"||hasExamResult(examRecords[e[0]])))return;let r=examRecords[e[0]],m=r?examMetrics(r):null;let tr=document.createElement("tr");if(m)tr.className="hasResult";tr.innerHTML=`<td><span class="examName">${escHtml(e[0])}</span></td><td>${fmtExamDate(e[1])}</td><td>${m?.scores[0]??"—"}</td><td>${m?.scores[1]??"—"}</td><td>${m?.scores[2]??"—"}</td><td>${m?.scores[3]??"—"}</td><td class="score">${m?.total??"—"}</td><td>${m?.correct??"—"}</td><td>${m?.wrong??"—"}</td><td>${m?m.missed:"—"}</td><td>${m?m.attempted:"—"}</td><td>${m?.accuracy!=null?m.accuracy.toFixed(1)+"%":"—"}</td><td>${r?.rank??"—"}</td><td><button class="examBtn" type="button" data-exam="${escHtml(e[0])}">${m?"Edit":"Enter"}</button></td>`;rows.append(tr)});rows.querySelectorAll("button[data-exam]").forEach(b=>b.onclick=()=>openExam(b.dataset.exam));let completed=EXAMS.filter(e=>hasExamResult(examRecords[e[0]])).map(e=>({e,r:examRecords[e[0]],m:examMetrics(examRecords[e[0]])}));$("examCount").textContent=completed.length+" / "+EXAMS.length;if(completed.length){let vals=completed.map(x=>x.m.total),avg=vals.reduce((a,b)=>a+b,0)/vals.length;$("examAvg").textContent=Math.round(avg);$("examHigh").textContent=Math.max(...vals);$("examLatest").textContent=completed[completed.length-1].m.total}else{$("examAvg").textContent=$("examHigh").textContent=$("examLatest").textContent="—"}if(typeof renderCommandCenter==="function")renderCommandCenter()}
@@ -732,12 +739,25 @@ async function importAakashCsv(file){
   }
   let ids=Object.keys(imported);
   if(!ids.length){$("saveStatus").textContent="No matching Aakash exams found in CSV.";return}
-  let{error}=await sb.from("exam_results").upsert(ids.map(id=>imported[id]),{onConflict:"user_id,exam_id"});
-  if(error){$("saveStatus").textContent="Aakash restore failed: "+error.message;return}
-  Object.assign(examRecords,imported);
+  let payload=ids.map(id=>Object.assign({},imported[id],{updated_at:new Date().toISOString()}));
+  let{error}=await sb.from("exam_results").upsert(payload,{onConflict:"user_id,exam_id"});
+  if(error){
+    Object.assign(examRecords,imported);
+    localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords));
+    examFilter="all";renderExams();
+    $("saveStatus").textContent="Database save failed, but your CSV scores are safely kept in this browser. Error: "+error.message;
+    return;
+  }
+  // Verify what Supabase actually stored before declaring success.
+  let{data:verified,error:verifyError}=await sb.from("exam_results").select("*").eq("user_id",user.id);
+  if(!verifyError&&(verified||[]).length){
+    verified.forEach(r=>examRecords[r.exam_id]=r);
+  }else{
+    Object.assign(examRecords,imported);
+  }
   localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords));
   examFilter="all";renderExams();
-  $("saveStatus").textContent=ids.length+" Aakash exam"+(ids.length===1?"":"s")+" restored ✓";
+  $("saveStatus").textContent=ids.length+" Aakash exam"+(ids.length===1?"":"s")+" restored and saved ✓";
 }
 $("aakashCsvImport").onchange=async e=>{let file=e.target.files&&e.target.files[0];if(file)await importAakashCsv(file);e.target.value=""};
 
