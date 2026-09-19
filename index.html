@@ -134,13 +134,13 @@ body{background-color:#eef2f8;background-image:radial-gradient(circle at 12% 8%,
 @keyframes openingLogo{0%{opacity:0;transform:scale(.72) translateY(12px)}55%{opacity:1;transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
 @keyframes openingLine{0%{width:0;opacity:0}55%{opacity:1}100%{width:180px;opacity:1}}
 @keyframes openingGlow{0%,100%{transform:scale(.85);opacity:.25}50%{transform:scale(1.12);opacity:.6}}
-.openingScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,rgba(73,112,195,.18),transparent 32%),linear-gradient(135deg,#071225,#102448 55%,#071225);color:#fff;animation:openingFade 2.15s ease forwards}
+.openingScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,rgba(73,112,195,.18),transparent 32%),linear-gradient(135deg,#071225,#102448 55%,#071225);color:#fff;animation:openingFade 2.85s ease forwards}
 .openingGlow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(120,166,255,.30),transparent 68%);filter:blur(5px);animation:openingGlow 2s ease-in-out infinite}
 .openingInner{position:relative;text-align:center;z-index:1}
-.openingLogo{width:82px;height:82px;object-fit:cover;border-radius:22px;box-shadow:0 14px 50px rgba(0,0,0,.35);animation:openingLogo 1s cubic-bezier(.22,1,.36,1) both}
+.openingLogo{width:96px;height:96px;display:flex;align-items:center;justify-content:center;font-size:72px;line-height:1;border-radius:26px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);box-shadow:0 14px 50px rgba(0,0,0,.35);animation:openingLogo 1s cubic-bezier(.22,1,.36,1) both}
 .openingTitle{margin:18px 0 4px;font-size:27px;font-weight:900;letter-spacing:-.03em;animation:openingLogo 1s .15s both}
 .openingSub{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#b9c9e8;animation:openingLogo 1s .28s both}
-.openingLine{height:2px;margin:18px auto 0;background:rgba(255,255,255,.75);animation:openingLine 1.2s .35s ease both}
+.openingLine{height:2px;margin:18px auto 0;background:rgba(255,255,255,.75);animation:openingLine 1.5s .35s ease both}
 .row.justCompleted{animation:rowComplete .7s ease}
 .row.justCompleted input{animation:journeyCheck .42s cubic-bezier(.22,1,.36,1)}
 .progress .fill.sweeping,.targetProgress i.sweeping{background-image:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);background-size:120px 100%;animation:progressSweep .7s ease}
@@ -161,7 +161,7 @@ body{background-color:#eef2f8;background-image:radial-gradient(circle at 12% 8%,
 <body><div class="openingScreen" id="openingScreen" aria-label="NEET 2027 loading">
   <div class="openingGlow"></div>
   <div class="openingInner">
-    <img class="openingLogo" src="favicon.png" alt="">
+    <div class="openingLogo" aria-hidden="true">🩺</div>
     <div class="openingTitle">NEET 2027 • COMMAND CENTER</div>
     <div class="openingSub">Build the future. One day at a time.</div>
     <div class="openingLine"></div>
@@ -321,7 +321,7 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
 </script><script id="journey-animation-js">
 (function(){
   window.addEventListener("load",function(){
-    setTimeout(function(){document.getElementById("openingScreen")?.remove()},2350);
+    setTimeout(function(){document.getElementById("openingScreen")?.remove()},3050);
     document.querySelectorAll(".commandCenter > *, .studyTimer, .examSection, .futureDoctor, .upgradeCard").forEach(function(el){
       el.classList.add("scrollReveal");
     });
