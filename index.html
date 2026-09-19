@@ -813,4 +813,60 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
   else initPremiumMotion();
 })();
 </script>
-</body></html>
+<script id="target-controls-final-fix">
+(function(){
+  function q(id){return document.getElementById(id)}
+  function readJSON(key){try{return JSON.parse(localStorage.getItem(key)||"{}")}catch(e){return {}}}
+  function refreshMain(){
+    let t=readJSON("neet27_targets");
+    ["Physics","Chemistry","Biology","Total"].forEach(function(k){let el=q("target"+k);if(el&&t[k]!=null)el.value=t[k]});
+    let total=Number(t.Total)||0, msg=q("targetMsg");
+    if(q("targetDistance")){
+      q("targetDistance").textContent=total?total+" points":"Set a target";
+      q("targetDistanceText").textContent=total?"Target: "+total+" / 720":"Use My Score Targets above.";
+      if(q("targetDistanceBar"))q("targetDistanceBar").style.width="0%";
+    }
+  }
+  function saveMain(){
+    let defs=[["Physics",180],["Chemistry",180],["Biology",360],["Total",720]],t={};
+    for(let i=0;i<defs.length;i++){
+      let k=defs[i][0],max=defs[i][1],el=q("target"+k),raw=el?el.value.trim():"",v=Number(raw);
+      if(raw!==""&&(!Number.isFinite(v)||v<0||v>max)){
+        if(q("targetMsg"))q("targetMsg").textContent=k+" must be between 0 and "+max+".";
+        return;
+      }
+      t[k]=raw===""?0:Math.round(v);
+    }
+    localStorage.setItem("neet27_targets",JSON.stringify(t));
+    refreshMain();
+    if(q("targetMsg"))q("targetMsg").textContent="Targets saved ✓";
+  }
+  function refreshAllen(){
+    let v=Number(localStorage.getItem("neet27_allen_target")||0);
+    if(q("allenTargetInput"))q("allenTargetInput").value=v?String(v):"";
+    if(q("allenTargetDistance")){
+      q("allenTargetDistance").textContent=v?v+" points":"Set a target";
+      q("allenTargetDistanceText").textContent=v?"Target: "+v+" / 720":"Enter an Allen total target above.";
+      if(q("allenTargetDistanceBar"))q("allenTargetDistanceBar").style.width="0%";
+    }
+  }
+  function saveAllen(){
+    let el=q("allenTargetInput"),raw=el?el.value.trim():"",v=Number(raw);
+    if(!raw||!Number.isFinite(v)||v<1||v>720){
+      if(q("allenTargetDistanceText"))q("allenTargetDistanceText").textContent="Enter a target from 1 to 720.";
+      return;
+    }
+    v=Math.round(v);
+    localStorage.setItem("neet27_allen_target",String(v));
+    refreshAllen();
+    if(q("allenTargetDistanceText"))q("allenTargetDistanceText").textContent="Target saved: "+v+" / 720";
+  }
+  function init(){
+    let a=q("saveTargets"),b=q("saveAllenTarget");
+    if(a){a.onclick=saveMain}
+    if(b){b.onclick=saveAllen}
+    refreshMain();refreshAllen();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+</script></body></html>
