@@ -697,23 +697,31 @@ function builtInAakashRecovery(uid){
     "UT-4":{user_id:uid,exam_id:"UT-4",physics_correct:17,physics_wrong:7,physics_missed:21,chemistry_correct:11,chemistry_wrong:18,chemistry_missed:16,botany_correct:33,botany_wrong:12,botany_missed:0,zoology_correct:28,zoology_wrong:13,zoology_missed:4,rank:null,percentile:43.10,updated_at:now}
   };
 }
-async function loadExams(){
-  $("saveStatus").textContent="Loading Aakash exams…";
+function mergeAakashRecovery(){
+  const builtIn=builtInAakashRecovery(user.id);
   let cached={};
   try{cached=JSON.parse(localStorage.getItem("neet27_aakash_cache")||"{}")}catch(e){cached={}};
-  const builtIn=builtInAakashRecovery(user.id);
+  // Verified recovery is the permanent baseline. Other records may add/edit,
+  // but an empty or failed remote response can never erase these rows.
+  examRecords=Object.assign({},builtIn,cached,examRecords||{});
+  return builtIn;
+}
+async function loadExams(){
+  $("saveStatus").textContent="Loading Aakash exams…";
+  const builtIn=mergeAakashRecovery();
+  renderExams();
+
   let{data,error}=await sb.from("exam_results").select("*").eq("user_id",user.id).order("updated_at",{ascending:true});
   let remote={};
   if(!error)(data||[]).forEach(r=>remote[r.exam_id]=r);
 
-  // Verified CSV recovery data is always available. User cache and online
-  // records override it, so existing edits are never replaced.
-  examRecords=Object.assign({},builtIn,cached,remote);
+  // Layer online records over the verified baseline, then re-apply recovery.
+  examRecords=Object.assign({},builtIn,examRecords,remote);
+  mergeAakashRecovery();
 
-  // Re-seed missing verified records into Supabase automatically.
   const missing=Object.keys(builtIn).filter(id=>!remote[id]);
   if(missing.length){
-    const payload=missing.map(id=>Object.assign({},examRecords[id],{
+    const payload=missing.map(id=>Object.assign({},builtIn[id],{
       user_id:user.id,exam_id:id,updated_at:new Date().toISOString()
     }));
     const restored=await sb.from("exam_results").upsert(payload,{onConflict:"user_id,exam_id"});
@@ -726,6 +734,7 @@ async function loadExams(){
     $("saveStatus").textContent=Object.keys(remote).length+" Aakash exam"+(Object.keys(remote).length===1?"":"s")+" loaded ✓";
   }
 
+  mergeAakashRecovery();
   try{localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords))}catch(e){}
   renderExams();
 }
