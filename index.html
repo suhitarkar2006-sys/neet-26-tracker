@@ -516,16 +516,19 @@ input{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
 @media(prefers-reduced-motion:reduce){.mountainClimber,.mountainClimber.up,.mountainClimber.down{animation:none!important;transition:none!important}}
 </style>
 <style id="login-video-background">
-#loginVideoBg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0b1220;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s ease;pointer-events:none}
+#loginVideoBg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;overflow:hidden;background:#0b1220;opacity:1;visibility:visible;pointer-events:none}
+#loginVideoBg:before{content:"";position:absolute;inset:0;background-image:url('aiims-background.jpg');background-position:center center;background-size:cover;background-repeat:no-repeat;z-index:0}
 #loginVideoBg.active{opacity:1;visibility:visible}
-#loginVideoBg:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,10,24,.30),rgba(3,10,24,.54)),linear-gradient(90deg,rgba(3,10,24,.18),rgba(3,10,24,.05),rgba(3,10,24,.22))}
-#loginVideoBg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.15s ease;filter:saturate(.88) contrast(1.02)}
-#loginVideoBg video.active{opacity:1}
+#loginVideoBg:after{content:"";position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(3,10,24,.20),rgba(3,10,24,.40)),linear-gradient(90deg,rgba(3,10,24,.10),rgba(3,10,24,.02),rgba(3,10,24,.14));transition:background .5s ease}
+#loginVideoBg video{position:absolute;left:0;top:0;width:100vw;height:100vh;min-width:100%;min-height:100%;display:block;object-fit:cover;object-position:center center;opacity:0;z-index:1;transition:opacity 1.15s ease;filter:saturate(.88) contrast(1.02)}
+#loginVideoBg video.active{opacity:.88}
 body.loginVideoMode{background:#0b1220!important}
+body.videoBackgroundMode{background:#0b1220 url('aiims-background.jpg') center/cover fixed no-repeat!important}
 body.loginVideoMode #auth{position:relative;z-index:2;background:rgba(255,255,255,.76);box-shadow:0 18px 65px rgba(0,0,0,.28)}
 body.loginVideoMode #auth:before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,.08);pointer-events:none}
 body.loginVideoMode #auth>*{position:relative;z-index:1}
-@media(max-width:700px){#loginVideoBg:after{background:linear-gradient(180deg,rgba(3,10,24,.34),rgba(3,10,24,.58))}body.loginVideoMode #auth{margin:28px auto}}
+body.videoBackgroundMode #app,body.videoBackgroundMode .app{position:relative;z-index:2}
+@media(max-width:700px){#loginVideoBg:after{background:linear-gradient(180deg,rgba(3,10,24,.24),rgba(3,10,24,.46))}body.loginVideoMode #auth{margin:28px auto}}
 @media(prefers-reduced-motion:reduce){#loginVideoBg,#loginVideoBg video{transition:none!important}}
 </style></head>
 <body><div id="loginVideoBg" aria-hidden="true">
@@ -1112,14 +1115,16 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
 
   function sync(){
     const loggedIn=auth.classList.contains("hidden");
-    if(loggedIn){
-      bg.classList.remove("active");
-      document.body.classList.remove("loginVideoMode");
-      v1.pause();v2.pause();
-      return;
-    }
     bg.classList.add("active");
-    document.body.classList.add("loginVideoMode");
+    document.body.classList.add("videoBackgroundMode");
+    document.body.classList.toggle("loginVideoMode",!loggedIn);
+    if(loggedIn){
+      v1.style.opacity=v1.classList.contains("active")?".38":"0";
+      v2.style.opacity=v2.classList.contains("active")?".38":"0";
+    }else{
+      v1.style.opacity="";
+      v2.style.opacity="";
+    }
     if(!v1.classList.contains("active")&&!v2.classList.contains("active"))show(0);
     else{
       const active=current===0?v1:v2;
