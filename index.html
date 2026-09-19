@@ -621,7 +621,7 @@ input{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
   <button type="button" data-scroll="examSection">📝<span>Tests</span></button>
 </nav>
 <section id="examSection" class="examSection">
-<div class="examTop"><div><h2 style="margin:0">📊 Aakash Exam Tracker</h2><p class="examHint">Aakash schedule is preloaded. Enter each result once and it stays synced to your account.</p></div><div class="controls" style="margin-top:0"><button id="showOnlyResults" type="button">Show completed</button><button id="showAllExams" type="button">Show all</button></div></div>
+<div class="examTop"><div><h2 style="margin:0">📊 Aakash Exam Tracker</h2><p class="examHint">Aakash schedule is preloaded. Enter each result once and it stays synced to your account.</p></div><div class="controls" style="margin-top:0"><button id="showOnlyResults" type="button">Show completed</button><button id="showAllExams" type="button">Show all</button><label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px"><span>Restore CSV</span><input id="aakashCsvImport" type="file" accept=".csv,text/csv" style="min-height:auto;width:190px;padding:6px"></label></div></div>
 <div class="resultSummary"><div class="resultMini"><div class="muted">Exams completed</div><div class="v" id="examCount">0 / 32</div></div><div class="resultMini"><div class="muted">Average score</div><div class="v" id="examAvg">—</div></div><div class="resultMini"><div class="muted">Highest score</div><div class="v" id="examHigh">—</div></div><div class="resultMini"><div class="muted">Latest score</div><div class="v" id="examLatest">—</div></div></div>
 <div class="examScroll"><table class="examTable"><thead><tr><th>Exam</th><th>Date</th><th>Physics</th><th>Chemistry</th><th>Botany</th><th>Zoology</th><th>Total</th><th>Correct</th><th>Wrong</th><th>Missed</th><th>Attempted</th><th>Accuracy</th><th>Rank</th><th>Edit</th></tr></thead><tbody id="examRows"></tbody></table></div>
 </section>
@@ -689,13 +689,57 @@ function subAttempt(r,s){let c=r[s+"_correct"],w=r[s+"_wrong"];return c==null&&w
 function subMissed(r,s){let m=r[s+"_missed"];if(m!=null)return m;let c=r[s+"_correct"],w=r[s+"_wrong"];return c==null&&w==null?0:45-(c||0)-(w||0)}
 function examMetrics(r){let ss=["physics","chemistry","botany","zoology"];let scores=ss.map(s=>subScore(r,s)||0),correct=ss.reduce((a,s)=>a+(r[s+"_correct"]||0),0),wrong=ss.reduce((a,s)=>a+(r[s+"_wrong"]||0),0),missed=ss.reduce((a,s)=>a+subMissed(r,s),0),attempted=correct+wrong,total=scores.reduce((a,b)=>a+b,0),accuracy=attempted?correct/attempted*100:null;return {scores,correct,wrong,missed,attempted,total,accuracy}}
 function hasExamResult(r){return !!r&&Object.keys(r).some(k=>k.endsWith("_correct")&&r[k]!=null)}
-async function loadExams(){let{data,error}=await sb.from("exam_results").select("*").eq("user_id",user.id);if(error){$("saveStatus").textContent="Daily tracker connected; exam tracker needs Supabase setup.";return}examRecords={};(data||[]).forEach(r=>examRecords[r.exam_id]=r);renderExams()}
-function renderExams(){let rows=$("examRows");rows.innerHTML="";let list=EXAMS.filter(e=>examFilter==="all"||hasExamResult(examRecords[e[0]]));EXAMS.forEach(e=>{if(!(examFilter==="all"||hasExamResult(examRecords[e[0]])))return;let r=examRecords[e[0]],m=r?examMetrics(r):null;let tr=document.createElement("tr");if(m)tr.className="hasResult";tr.innerHTML=`<td><span class="examName">${escHtml(e[0])}</span></td><td>${fmtExamDate(e[1])}</td><td>${m?.scores[0]??"—"}</td><td>${m?.scores[1]??"—"}</td><td>${m?.scores[2]??"—"}</td><td>${m?.scores[3]??"—"}</td><td class="score">${m?.total??"—"}</td><td>${m?.correct??"—"}</td><td>${m?.wrong??"—"}</td><td>${m?m.missed:"—"}</td><td>${m?m.attempted:"—"}</td><td>${m?.accuracy!=null?m.accuracy.toFixed(1)+"%":"—"}</td><td>${r?.rank??"—"}</td><td><button class="examBtn" type="button" data-exam="${escHtml(e[0])}">${m?"Edit":"Enter"}</button></td>`;rows.append(tr)});rows.querySelectorAll("button[data-exam]").forEach(b=>b.onclick=()=>openExam(b.dataset.exam));let completed=EXAMS.filter(e=>hasExamResult(examRecords[e[0]])).map(e=>({e,r:examRecords[e[0]],m:examMetrics(examRecords[e[0]])}));$("examCount").textContent=completed.length+" / "+EXAMS.length;if(completed.length){let vals=completed.map(x=>x.m.total),avg=vals.reduce((a,b)=>a+b,0)/vals.length;$("examAvg").textContent=Math.round(avg);$("examHigh").textContent=Math.max(...vals);$("examLatest").textContent=completed[completed.length-1].m.total}else{$("examAvg").textContent=$("examHigh").textContent=$("examLatest").textContent="—"}if(typeof renderCommandCenter==="function")renderCommandCenter()}
+async function loadExams(){
+  $("saveStatus").textContent="Loading Aakash exams…";
+  let{data,error}=await sb.from("exam_results").select("*").eq("user_id",user.id).order("updated_at",{ascending:true});
+  if(error){
+    let cached=localStorage.getItem("neet27_aakash_cache");
+    if(cached){try{examRecords=JSON.parse(cached)}catch(e){examRecords={}}}
+    $("saveStatus").textContent="Aakash scores couldn't be read from Supabase. Showing saved browser copy if available.";
+    renderExams();
+    return;
+  }
+  examRecords={};
+  (data||[]).forEach(r=>examRecords[r.exam_id]=r);
+  localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords));
+  $("saveStatus").textContent=(data||[]).length+" Aakash exam"+((data||[]).length===1?"":"s")+" loaded ✓";
+  renderExams();
+}
+function renderExams(){let rows=$("examRows");if(!rows)return;rows.innerHTML="";let list=EXAMS.filter(e=>examFilter==="all"||hasExamResult(examRecords[e[0]]));EXAMS.forEach(e=>{if(!(examFilter==="all"||hasExamResult(examRecords[e[0]])))return;let r=examRecords[e[0]],m=r?examMetrics(r):null;let tr=document.createElement("tr");if(m)tr.className="hasResult";tr.innerHTML=`<td><span class="examName">${escHtml(e[0])}</span></td><td>${fmtExamDate(e[1])}</td><td>${m?.scores[0]??"—"}</td><td>${m?.scores[1]??"—"}</td><td>${m?.scores[2]??"—"}</td><td>${m?.scores[3]??"—"}</td><td class="score">${m?.total??"—"}</td><td>${m?.correct??"—"}</td><td>${m?.wrong??"—"}</td><td>${m?m.missed:"—"}</td><td>${m?m.attempted:"—"}</td><td>${m?.accuracy!=null?m.accuracy.toFixed(1)+"%":"—"}</td><td>${r?.rank??"—"}</td><td><button class="examBtn" type="button" data-exam="${escHtml(e[0])}">${m?"Edit":"Enter"}</button></td>`;rows.append(tr)});rows.querySelectorAll("button[data-exam]").forEach(b=>b.onclick=()=>openExam(b.dataset.exam));let completed=EXAMS.filter(e=>hasExamResult(examRecords[e[0]])).map(e=>({e,r:examRecords[e[0]],m:examMetrics(examRecords[e[0]])}));$("examCount").textContent=completed.length+" / "+EXAMS.length;if(completed.length){let vals=completed.map(x=>x.m.total),avg=vals.reduce((a,b)=>a+b,0)/vals.length;$("examAvg").textContent=Math.round(avg);$("examHigh").textContent=Math.max(...vals);$("examLatest").textContent=completed[completed.length-1].m.total}else{$("examAvg").textContent=$("examHigh").textContent=$("examLatest").textContent="—"}if(typeof renderCommandCenter==="function")renderCommandCenter()}
 function openExam(id){editingExam=id;let e=EXAMS.find(x=>x[0]===id),r=examRecords[id]||blankExam();$("examModalTitle").textContent=id;$("examModalDate").textContent=fmtExamDate(e[1])+" • "+e[2];["physics","chemistry","botany","zoology"].forEach(s=>["correct","wrong","missed"].forEach(k=>$(s+k.charAt(0).toUpperCase()+k.slice(1)).value=r[s+"_"+k]??""));$("examRank").value=r.rank??"";$("examPercentile").value=r.percentile??"";updateExamPreview();$("examFormMsg").textContent="";$("examModal").classList.remove("hidden")}
 function updateExamPreview(){["physics","chemistry","botany","zoology"].forEach(s=>{let c=num($(s+"Correct").value)||0,w=num($(s+"Wrong").value)||0;$(s+"Score").textContent=4*c-w})}
 async function saveExamResult(){let r=blankExam();["physics","chemistry","botany","zoology"].forEach(s=>["correct","wrong","missed"].forEach(k=>r[s+"_"+k]=num($(s+k.charAt(0).toUpperCase()+k.slice(1)).value)));for(let s of ["physics","chemistry","botany","zoology"]){let c=r[s+"_correct"],w=r[s+"_wrong"],m=r[s+"_missed"];if(c==null||w==null||m==null){$("examFormMsg").textContent="Enter Correct, Wrong and Missed for all four subjects.";return}if(c<0||w<0||m<0||c+w+m!==45){$("examFormMsg").textContent="Each subject must total exactly 45 questions: Correct + Wrong + Missed = 45.";return}}r.rank=num($("examRank").value);r.percentile=num($("examPercentile").value);r.user_id=user.id;r.exam_id=editingExam;let{error}=await sb.from("exam_results").upsert(r,{onConflict:"user_id,exam_id"});if(error){$("examFormMsg").textContent=error.message;return}examRecords[editingExam]=r;$("examModal").classList.add("hidden");$("saveStatus").textContent="Exam result saved online ✓";renderExams()}
 async function clearExamResult(){if(!editingExam)return;let{error}=await sb.from("exam_results").delete().eq("user_id",user.id).eq("exam_id",editingExam);if(error){$("examFormMsg").textContent=error.message;return}delete examRecords[editingExam];$("examModal").classList.add("hidden");renderExams()}
 $("closeExamModal").onclick=$("cancelExam").onclick=()=>$("examModal").classList.add("hidden");$("saveExam").onclick=saveExamResult;$("deleteExamResult").onclick=clearExamResult;["physics","chemistry","botany","zoology"].forEach(s=>["Correct","Wrong","Missed"].forEach(k=>$(s+k).oninput=updateExamPreview));$("showOnlyResults").onclick=()=>{examFilter="results";renderExams()};$("showAllExams").onclick=()=>{examFilter="all";renderExams()};
+async function importAakashCsv(file){
+  let text=await file.text(),lines=text.trim().split(/\r?\n/);
+  if(lines.length<2){$("saveStatus").textContent="CSV is empty.";return}
+  let header=lines[0].split(",").map(x=>x.trim()),idx={};header.forEach((h,i)=>idx[h]=i);
+  let needed=["exam_id","physics_correct","physics_wrong","physics_missed","chemistry_correct","chemistry_wrong","chemistry_missed","botany_correct","botany_wrong","botany_missed","zoology_correct","zoology_wrong","zoology_missed"];
+  if(needed.some(k=>idx[k]==null)){$("saveStatus").textContent="CSV format doesn't match exam_results.";return}
+  function parseLine(line){
+    let out=[],cur="",quoted=false;
+    for(let i=0;i<line.length;i++){let ch=line[i];if(ch==='"'){quoted=!quoted}else if(ch===','&&!quoted){out.push(cur);cur=""}else cur+=ch}out.push(cur);return out;
+  }
+  let imported={};
+  for(let i=1;i<lines.length;i++){
+    let row=parseLine(lines[i]);if(!row.length)continue;
+    let r={user_id:user.id};
+    needed.forEach(k=>{r[k]=k==="exam_id"?row[idx[k]]:num(row[idx[k]])});
+    r.rank=idx.rank!=null?num(row[idx.rank]):null;r.percentile=idx.percentile!=null?num(row[idx.percentile]):null;
+    if(!EXAMS.some(e=>e[0]===r.exam_id))continue;
+    imported[r.exam_id]=r;
+  }
+  let ids=Object.keys(imported);
+  if(!ids.length){$("saveStatus").textContent="No matching Aakash exams found in CSV.";return}
+  let{error}=await sb.from("exam_results").upsert(ids.map(id=>imported[id]),{onConflict:"user_id,exam_id"});
+  if(error){$("saveStatus").textContent="Aakash restore failed: "+error.message;return}
+  Object.assign(examRecords,imported);
+  localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords));
+  examFilter="all";renderExams();
+  $("saveStatus").textContent=ids.length+" Aakash exam"+(ids.length===1?"":"s")+" restored ✓";
+}
+$("aakashCsvImport").onchange=async e=>{let file=e.target.files&&e.target.files[0];if(file)await importAakashCsv(file);e.target.value=""};
 
 
 let allenRecords={},allenFilter="all",editingAllenExam=null;
@@ -705,7 +749,19 @@ function allenSubMissed(r,s,total){let m=r[s+"_missed"];if(m!=null)return m;let 
 function allenMetrics(r){let scores=[allenSubScore(r,"physics")||0,allenSubScore(r,"chemistry")||0,allenSubScore(r,"biology")||0],correct=(r.physics_correct||0)+(r.chemistry_correct||0)+(r.biology_correct||0),wrong=(r.physics_wrong||0)+(r.chemistry_wrong||0)+(r.biology_wrong||0),missed=allenSubMissed(r,"physics",45)+allenSubMissed(r,"chemistry",45)+allenSubMissed(r,"biology",90),attempted=correct+wrong,total=scores.reduce((a,b)=>a+b,0),accuracy=attempted?correct/attempted*100:null;return {scores,correct,wrong,missed,attempted,total,accuracy}}
 function hasAllenResult(r){return !!r&&["physics","chemistry","biology"].some(s=>r[s+"_correct"]!=null)}
 function allenDate(d){if(!d)return "—";return new Intl.DateTimeFormat("en-IN",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(d+"T00:00:00Z"))}
-async function loadAllenExams(){let{data,error}=await sb.from("allen_exam_results").select("*").eq("user_id",user.id).order("exam_date",{ascending:true}).order("created_at",{ascending:true});if(error){$("saveStatus").textContent="Aakash tracker connected; run the Allen setup SQL to enable Allen results.";return}allenRecords={};(data||[]).forEach(r=>allenRecords[r.exam_id]=r);renderAllenExams()}
+async function loadAllenExams(){
+  $("saveStatus").textContent="Loading Allen exams…";
+  let{data,error}=await sb.from("allen_exam_results").select("*").eq("user_id",user.id).order("exam_date",{ascending:true}).order("created_at",{ascending:true});
+  if(error){
+    $("saveStatus").textContent="Allen is ready, but the Allen database table needs setup in Supabase.";
+    renderAllenExams();
+    return;
+  }
+  allenRecords={};
+  (data||[]).forEach(r=>allenRecords[r.exam_id]=r);
+  $("saveStatus").textContent=(data||[]).length+" Allen exam"+((data||[]).length===1?"":"s")+" loaded ✓";
+  renderAllenExams();
+}
 function renderAllenExams(){let rows=$("allenExamRows");if(!rows)return;rows.innerHTML="";let all=Object.values(allenRecords).sort((a,b)=>(a.exam_date||"").localeCompare(b.exam_date||"")||(a.name||"").localeCompare(b.name||""));let shown=all.filter(r=>allenFilter==="all"||hasAllenResult(r));shown.forEach(r=>{let m=hasAllenResult(r)?allenMetrics(r):null,tr=document.createElement("tr");if(m)tr.className="hasResult";tr.innerHTML=`<td><span class="examName">${escHtml(r.name||"Allen Exam")}</span></td><td>${allenDate(r.exam_date)}</td><td>${m?.scores[0]??"—"}</td><td>${m?.scores[1]??"—"}</td><td>${m?.scores[2]??"—"}</td><td class="score">${m?.total??"—"}</td><td>${m?.correct??"—"}</td><td>${m?.wrong??"—"}</td><td>${m?m.missed:"—"}</td><td>${m?m.attempted:"—"}</td><td>${m?.accuracy!=null?m.accuracy.toFixed(1)+"%":"—"}</td><td>${r.rank??"—"}</td><td><button class="examBtn" type="button" data-allen-exam="${escHtml(r.exam_id)}">${m?"Edit":"Enter result"}</button></td>`;rows.append(tr)});rows.querySelectorAll("button[data-allen-exam]").forEach(b=>b.onclick=()=>openAllenExam(b.dataset.allenExam));let completed=all.filter(hasAllenResult),vals=completed.map(r=>allenMetrics(r).total);$("allenExamCount").textContent=all.length;if(vals.length){$("allenExamAvg").textContent=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);$("allenExamHigh").textContent=Math.max(...vals);$("allenExamLatest").textContent=allenMetrics(completed[completed.length-1]).total}else{$("allenExamAvg").textContent=$("allenExamHigh").textContent=$("allenExamLatest").textContent="—"}renderAllenScoreChart();renderAllenStats();if(typeof renderMBBSMountain==="function")renderMBBSMountain()}
 function openAllenExam(id){editingAllenExam=id;let r=allenRecords[id]||blankAllenExam();$("allenModalTitle").textContent=r.name?"Edit Allen Exam":"Add Allen Exam";$("allenModalDate").textContent=r.name?"Update the exam details and result.":"Enter the exam name and date.";$("allenExamName").value=r.name||"";$("allenExamDate").value=r.exam_date||"";["physics","chemistry","biology"].forEach(s=>["correct","wrong","missed"].forEach(k=>$("allen"+s.charAt(0).toUpperCase()+s.slice(1)+k.charAt(0).toUpperCase()+k.slice(1)).value=r[s+"_"+k]??""));$("allenRank").value=r.rank??"";$("allenPercentile").value=r.percentile??"";updateAllenPreview();$("allenFormMsg").textContent="";$("deleteAllenResult").textContent=r.name?"Delete exam":"Delete";$("allenExamModal").classList.remove("hidden")}
 function updateAllenPreview(){["physics","chemistry","biology"].forEach(s=>{let c=num($("allen"+s.charAt(0).toUpperCase()+s.slice(1)+"Correct").value)||0,w=num($("allen"+s.charAt(0).toUpperCase()+s.slice(1)+"Wrong").value)||0;$("allen"+s.charAt(0).toUpperCase()+s.slice(1)+"Score").textContent=4*c-w})}
