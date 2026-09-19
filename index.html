@@ -516,22 +516,22 @@ input{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
 @media(prefers-reduced-motion:reduce){.mountainClimber,.mountainClimber.up,.mountainClimber.down{animation:none!important;transition:none!important}}
 </style>
 <style id="login-video-background">
-#loginVideoBg{position:fixed;top:0;left:0;right:0;bottom:0;width:auto;height:auto;z-index:0;overflow:hidden;background:#0b1220;opacity:1;visibility:visible;pointer-events:none;isolation:isolate}
-#loginBgImage{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center center;z-index:0}
-#loginVideoBg video{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center center;opacity:0;z-index:1;transition:opacity 1.15s ease;filter:saturate(.88) contrast(1.02)}
-#loginVideoBg video.active{opacity:.90}
-#loginVideoBg:after{content:"";position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(3,10,24,.18),rgba(3,10,24,.38)),linear-gradient(90deg,rgba(3,10,24,.08),rgba(3,10,24,.02),rgba(3,10,24,.12));pointer-events:none}
-body.loginVideoMode,body.videoBackgroundMode{background:transparent!important;background-image:none!important}
+html,body{min-height:100%;background:#0b1220!important}
+#loginVideoBg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;background:#0b1220;pointer-events:none;isolation:isolate}
+#loginBgImage{position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center center;z-index:0}
+#loginVideoBg video{position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:fill;object-position:center center;opacity:0;z-index:1;transition:opacity .8s ease;filter:saturate(.88) contrast(1.02)}
+#loginVideoBg.videoOn #loginVideo2{opacity:.90}
+#loginVideoBg:after{content:"";position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(3,10,24,.14),rgba(3,10,24,.34));pointer-events:none}
+body.loginVideoMode,body.videoBackgroundMode{background:#0b1220!important;background-image:none!important}
 body.loginVideoMode #auth{position:relative;z-index:2;background:rgba(255,255,255,.76);box-shadow:0 18px 65px rgba(0,0,0,.28)}
 body.loginVideoMode #auth:before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,.08);pointer-events:none}
 body.loginVideoMode #auth>*{position:relative;z-index:1}
 body.videoBackgroundMode #app,body.videoBackgroundMode .app{position:relative;z-index:2}
-@media(max-width:700px){#loginVideoBg:after{background:linear-gradient(180deg,rgba(3,10,24,.22),rgba(3,10,24,.44))}body.loginVideoMode #auth{margin:28px auto}}
+@media(max-width:700px){body.loginVideoMode #auth{margin:28px auto}}
 @media(prefers-reduced-motion:reduce){#loginVideoBg,#loginVideoBg video{transition:none!important}}
 </style></head>
 <body><div id="loginVideoBg" aria-hidden="true">
 <img id="loginBgImage" src="aiims-background.jpg" alt="">
-<video id="loginVideo1" muted playsinline preload="auto"></video>
 <video id="loginVideo2" muted playsinline preload="auto"></video>
 </div>
 <div id="auth" class="auth"><h2>NEET 27 Tracker</h2><p class="muted">Your checklist syncs online across devices.</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password (6+ characters)"><button id="signup" class="primary">Create account</button><button id="signin">Sign in</button><button id="forgot" type="button">Forgot password?</button><div id="resetBox" class="hidden"><p class="muted" style="margin-bottom:8px">Choose a new password</p><input id="newPassword" type="password" placeholder="New password (6+ characters)"><button id="updatePassword" class="primary">Set new password</button><button id="cancelReset" type="button">Cancel</button></div><div id="authMsg" class="msg"></div></div>
@@ -1077,60 +1077,36 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
 (function(){
   const bg=document.getElementById("loginVideoBg");
   const img=document.getElementById("loginBgImage");
-  const v1=document.getElementById("loginVideo1");
   const v2=document.getElementById("loginVideo2");
   const auth=document.getElementById("auth");
-  if(!bg||!img||!v1||!v2||!auth)return;
+  if(!bg||!img||!v2||!auth)return;
 
-  v1.src="video1.mp4";
   v2.src="video2.mp4";
-  v1.loop=false;
-  v2.loop=false;
+  v2.loop=true;
+  v2.muted=true;
+  v2.playsInline=true;
 
-  let current=0;
-  let switching=false;
-
-  function playVideo(v){
-    try{v.muted=true;v.playsInline=true}catch(e){}
-    const p=v.play();
+  function playVideo(){
+    const p=v2.play();
     if(p&&p.catch)p.catch(function(){});
   }
 
-  function show(index){
-    const next=index===0?v1:v2;
-    const prev=index===0?v2:v1;
-    switching=true;
-    next.currentTime=0;
-    next.classList.add("active");
-    playVideo(next);
-    setTimeout(function(){
-      prev.classList.remove("active");
-      switching=false;
-    },1100);
-    current=index;
-  }
-
-  function nextVideo(){
-    if(switching)return;
-    show(current===0?1:0);
-  }
-
-  v1.addEventListener("ended",nextVideo);
-  v2.addEventListener("ended",nextVideo);
-  v1.addEventListener("error",function(){if(current===0)show(1)});
-  v2.addEventListener("error",function(){if(current===1)show(0)});
-
   function sync(){
     const loggedIn=auth.classList.contains("hidden");
-    bg.classList.add("active");
     document.body.classList.add("videoBackgroundMode");
     document.body.classList.toggle("loginVideoMode",!loggedIn);
-    if(!v1.classList.contains("active")&&!v2.classList.contains("active"))show(0);
-    else playVideo(current===0?v1:v2);
+    if(loggedIn){
+      bg.classList.add("videoOn");
+      playVideo();
+    }else{
+      bg.classList.remove("videoOn");
+      v2.pause();
+      try{v2.currentTime=0}catch(e){}
+    }
   }
 
   document.addEventListener("visibilitychange",function(){
-    if(!document.hidden)playVideo(current===0?v1:v2);
+    if(!document.hidden&&auth.classList.contains("hidden"))playVideo();
   });
 
   new MutationObserver(sync).observe(auth,{attributes:true,attributeFilter:["class"]});
