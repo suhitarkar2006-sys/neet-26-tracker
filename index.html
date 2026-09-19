@@ -494,6 +494,26 @@ input{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
   .dashboardHero,.day:not(.empty),button,input{transition:none!important}
   .motionReveal{opacity:1!important;transform:none!important}
 }
+
+/* MBBS Mountain */
+.mbbsMountain{overflow:hidden;position:relative}
+.mountainHero{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:8px}
+.mountainHero h2{margin:0}
+.mountainScore{font-size:1.15rem;font-weight:800;white-space:nowrap}
+.mountainWrap{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,rgba(238,247,255,.9),rgba(247,250,245,.95));border:1px solid rgba(49,89,183,.12)}
+.mountainSvg{display:block;width:100%;height:auto;min-height:250px}
+.mountainPeakLabel{font-weight:900;letter-spacing:.08em;font-size:13px}
+.mountainMeta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:9px}
+.mountainStatus{font-weight:700}
+.mountainHint{font-size:.82rem}
+.mountainClimber{transition:transform .8s cubic-bezier(.22,1,.36,1)}
+.mountainClimber.up{animation:mountainClimbUp .8s ease both}
+.mountainClimber.down{animation:mountainClimbDown .8s ease both}
+@keyframes mountainClimbUp{0%{opacity:.5;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes mountainClimbDown{0%{opacity:.5;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}
+.mountainFlag{font-size:22px}
+@media(max-width:600px){.mountainScore{font-size:1rem}.mountainSvg{min-height:210px}.mountainPeakLabel{font-size:10px}.mountainMeta{font-size:.86rem}}
+@media(prefers-reduced-motion:reduce){.mountainClimber,.mountainClimber.up,.mountainClimber.down{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body><div id="auth" class="auth"><h2>NEET 27 Tracker</h2><p class="muted">Your checklist syncs online across devices.</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password (6+ characters)"><button id="signup" class="primary">Create account</button><button id="signin">Sign in</button><button id="forgot" type="button">Forgot password?</button><div id="resetBox" class="hidden"><p class="muted" style="margin-bottom:8px">Choose a new password</p><input id="newPassword" type="password" placeholder="New password (6+ characters)"><button id="updatePassword" class="primary">Set new password</button><button id="cancelReset" type="button">Cancel</button></div><div id="authMsg" class="msg"></div></div>
@@ -532,7 +552,43 @@ input{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
     <div class="ccHero"><div><h2 style="margin:0">🗓️ Preparation Heatmap</h2><div class="muted">Each square shows how much of that day's checklist you completed.</div></div><div class="muted">0 → 100%</div></div>
     <div class="heatmap" id="ccHeatmap"></div>
   </div>
-  <div class="ccCard" style="margin-top:12px">
+  <div class="ccCard mbbsMountain" style="margin-top:12px">
+  <div class="mountainHero">
+    <div><h2>⛰️ My MBBS Mountain</h2><div class="muted">Every mock test moves you closer to the peak.</div></div>
+    <div class="mountainScore" id="mountainScore">— / —</div>
+  </div>
+  <div class="mountainWrap">
+    <svg class="mountainSvg" viewBox="0 0 760 360" role="img" aria-labelledby="mountainTitle mountainDesc">
+      <title id="mountainTitle">MBBS Mountain progress</title>
+      <desc id="mountainDesc">The climber rises when your latest mock score improves and falls when it decreases.</desc>
+      <defs>
+        <linearGradient id="mountainSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcecff"/><stop offset="1" stop-color="#f6fbf4"/></linearGradient>
+        <linearGradient id="mountainFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d9bc8"/><stop offset="1" stop-color="#526b55"/></linearGradient>
+      </defs>
+      <rect width="760" height="360" fill="url(#mountainSky)"/>
+      <circle cx="650" cy="70" r="34" fill="#fff" opacity=".72"/>
+      <path d="M0 315 L155 205 L225 250 L405 55 L570 235 L635 190 L760 315 Z" fill="url(#mountainFill)"/>
+      <path d="M405 55 L355 126 L390 112 L420 142 L455 101 L485 145 Z" fill="#f5f8fb" opacity=".95"/>
+      <path d="M82 304 C175 275 238 230 294 182 C334 148 370 103 405 65" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="9 8" opacity=".9"/>
+      <path d="M82 304 C175 275 238 230 294 182 C334 148 370 103 405 65" fill="none" stroke="#3159b7" stroke-width="2" opacity=".75"/>
+      <line x1="405" y1="55" x2="405" y2="28" stroke="#27364d" stroke-width="3"/>
+      <path d="M405 29 L453 43 L405 57 Z" fill="#3159b7"/>
+      <text x="462" y="48" class="mountainPeakLabel" fill="#172033">MBBS SEAT</text>
+      <g id="mountainClimber" class="mountainClimber">
+        <circle cx="82" cy="304" r="8" fill="#172033"/>
+        <circle cx="82" cy="300" r="4" fill="#fff"/>
+        <path d="M82 312 L82 326 M82 317 L73 322 M82 317 L91 322 M82 326 L75 334 M82 326 L89 334" stroke="#172033" stroke-width="4" stroke-linecap="round"/>
+      </g>
+      <text x="24" y="342" fill="#526070" font-size="12">START</text>
+      <text x="682" y="342" fill="#526070" font-size="12">0 → 720</text>
+    </svg>
+  </div>
+  <div class="mountainMeta">
+    <div class="mountainStatus" id="mountainStatus">Save a mock-test result to start climbing.</div>
+    <div class="muted mountainHint" id="mountainHint">Higher marks = higher on the mountain • Lower marks = lower down</div>
+  </div>
+</div>
+<div class="ccCard" style="margin-top:12px">
     <h2 style="margin:0">🎯 My Score Targets</h2>
     <div class="ccTargets">
       <label>Physics<input id="targetPhysics" type="number" min="0" max="180" placeholder="180"></label>
@@ -650,7 +706,7 @@ function allenMetrics(r){let scores=[allenSubScore(r,"physics")||0,allenSubScore
 function hasAllenResult(r){return !!r&&["physics","chemistry","biology"].some(s=>r[s+"_correct"]!=null)}
 function allenDate(d){if(!d)return "—";return new Intl.DateTimeFormat("en-IN",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(d+"T00:00:00Z"))}
 async function loadAllenExams(){let{data,error}=await sb.from("allen_exam_results").select("*").eq("user_id",user.id).order("exam_date",{ascending:true}).order("created_at",{ascending:true});if(error){$("saveStatus").textContent="Aakash tracker connected; run the Allen setup SQL to enable Allen results.";return}allenRecords={};(data||[]).forEach(r=>allenRecords[r.exam_id]=r);renderAllenExams()}
-function renderAllenExams(){let rows=$("allenExamRows");if(!rows)return;rows.innerHTML="";let all=Object.values(allenRecords).sort((a,b)=>(a.exam_date||"").localeCompare(b.exam_date||"")||(a.name||"").localeCompare(b.name||""));let shown=all.filter(r=>allenFilter==="all"||hasAllenResult(r));shown.forEach(r=>{let m=hasAllenResult(r)?allenMetrics(r):null,tr=document.createElement("tr");if(m)tr.className="hasResult";tr.innerHTML=`<td><span class="examName">${escHtml(r.name||"Allen Exam")}</span></td><td>${allenDate(r.exam_date)}</td><td>${m?.scores[0]??"—"}</td><td>${m?.scores[1]??"—"}</td><td>${m?.scores[2]??"—"}</td><td class="score">${m?.total??"—"}</td><td>${m?.correct??"—"}</td><td>${m?.wrong??"—"}</td><td>${m?m.missed:"—"}</td><td>${m?m.attempted:"—"}</td><td>${m?.accuracy!=null?m.accuracy.toFixed(1)+"%":"—"}</td><td>${r.rank??"—"}</td><td><button class="examBtn" type="button" data-allen-exam="${escHtml(r.exam_id)}">${m?"Edit":"Enter result"}</button></td>`;rows.append(tr)});rows.querySelectorAll("button[data-allen-exam]").forEach(b=>b.onclick=()=>openAllenExam(b.dataset.allenExam));let completed=all.filter(hasAllenResult),vals=completed.map(r=>allenMetrics(r).total);$("allenExamCount").textContent=all.length;if(vals.length){$("allenExamAvg").textContent=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);$("allenExamHigh").textContent=Math.max(...vals);$("allenExamLatest").textContent=allenMetrics(completed[completed.length-1]).total}else{$("allenExamAvg").textContent=$("allenExamHigh").textContent=$("allenExamLatest").textContent="—"}renderAllenScoreChart();renderAllenStats()}
+function renderAllenExams(){let rows=$("allenExamRows");if(!rows)return;rows.innerHTML="";let all=Object.values(allenRecords).sort((a,b)=>(a.exam_date||"").localeCompare(b.exam_date||"")||(a.name||"").localeCompare(b.name||""));let shown=all.filter(r=>allenFilter==="all"||hasAllenResult(r));shown.forEach(r=>{let m=hasAllenResult(r)?allenMetrics(r):null,tr=document.createElement("tr");if(m)tr.className="hasResult";tr.innerHTML=`<td><span class="examName">${escHtml(r.name||"Allen Exam")}</span></td><td>${allenDate(r.exam_date)}</td><td>${m?.scores[0]??"—"}</td><td>${m?.scores[1]??"—"}</td><td>${m?.scores[2]??"—"}</td><td class="score">${m?.total??"—"}</td><td>${m?.correct??"—"}</td><td>${m?.wrong??"—"}</td><td>${m?m.missed:"—"}</td><td>${m?m.attempted:"—"}</td><td>${m?.accuracy!=null?m.accuracy.toFixed(1)+"%":"—"}</td><td>${r.rank??"—"}</td><td><button class="examBtn" type="button" data-allen-exam="${escHtml(r.exam_id)}">${m?"Edit":"Enter result"}</button></td>`;rows.append(tr)});rows.querySelectorAll("button[data-allen-exam]").forEach(b=>b.onclick=()=>openAllenExam(b.dataset.allenExam));let completed=all.filter(hasAllenResult),vals=completed.map(r=>allenMetrics(r).total);$("allenExamCount").textContent=all.length;if(vals.length){$("allenExamAvg").textContent=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);$("allenExamHigh").textContent=Math.max(...vals);$("allenExamLatest").textContent=allenMetrics(completed[completed.length-1]).total}else{$("allenExamAvg").textContent=$("allenExamHigh").textContent=$("allenExamLatest").textContent="—"}renderAllenScoreChart();renderAllenStats();if(typeof renderMBBSMountain==="function")renderMBBSMountain()}
 function openAllenExam(id){editingAllenExam=id;let r=allenRecords[id]||blankAllenExam();$("allenModalTitle").textContent=r.name?"Edit Allen Exam":"Add Allen Exam";$("allenModalDate").textContent=r.name?"Update the exam details and result.":"Enter the exam name and date.";$("allenExamName").value=r.name||"";$("allenExamDate").value=r.exam_date||"";["physics","chemistry","biology"].forEach(s=>["correct","wrong","missed"].forEach(k=>$("allen"+s.charAt(0).toUpperCase()+s.slice(1)+k.charAt(0).toUpperCase()+k.slice(1)).value=r[s+"_"+k]??""));$("allenRank").value=r.rank??"";$("allenPercentile").value=r.percentile??"";updateAllenPreview();$("allenFormMsg").textContent="";$("deleteAllenResult").textContent=r.name?"Delete exam":"Delete";$("allenExamModal").classList.remove("hidden")}
 function updateAllenPreview(){["physics","chemistry","biology"].forEach(s=>{let c=num($("allen"+s.charAt(0).toUpperCase()+s.slice(1)+"Correct").value)||0,w=num($("allen"+s.charAt(0).toUpperCase()+s.slice(1)+"Wrong").value)||0;$("allen"+s.charAt(0).toUpperCase()+s.slice(1)+"Score").textContent=4*c-w})}
 async function saveAllenResult(){let name=$("allenExamName").value.trim(),examDate=$("allenExamDate").value;if(!name||!examDate){$("allenFormMsg").textContent="Enter the Allen exam name and date.";return}let r=blankAllenExam();r.name=name;r.exam_date=examDate;for(let s of ["physics","chemistry","biology"]){for(let k of ["correct","wrong","missed"]){let id="allen"+s.charAt(0).toUpperCase()+s.slice(1)+k.charAt(0).toUpperCase()+k.slice(1);r[s+"_"+k]=num($(id).value)}let total=s==="biology"?90:45,c=r[s+"_correct"],w=r[s+"_wrong"],m=r[s+"_missed"];if(c==null||w==null||m==null){$("allenFormMsg").textContent="Enter Correct, Wrong and Missed for Physics, Chemistry and Biology.";return}if(c<0||w<0||m<0||c+w+m!==total){$("allenFormMsg").textContent="Physics/Chemistry must total 45 each; Biology must total 90 (Correct + Wrong + Missed).";return}}r.rank=num($("allenRank").value);r.percentile=num($("allenPercentile").value);r.user_id=user.id;r.exam_id=editingAllenExam||("allen_"+Date.now()+"_"+Math.random().toString(36).slice(2,8));let{error}=await sb.from("allen_exam_results").upsert(r,{onConflict:"user_id,exam_id"});if(error){$("allenFormMsg").textContent=error.message;return}allenRecords[r.exam_id]=r;editingAllenExam=r.exam_id;$("allenExamModal").classList.add("hidden");$("saveStatus").textContent="Allen exam result saved online ✓";renderAllenExams()}
@@ -666,7 +722,35 @@ function calcStreak(){let today=iso(new Date());if(today<MIN)today=MIN;if(today>
 function examList(){return EXAMS.filter(e=>hasExamResult(examRecords[e[0]])).map(e=>({e,r:examRecords[e[0]],m:examMetrics(examRecords[e[0]])}))}
 function renderScoreChart(){let canvas=$("scoreChart");if(!canvas)return;let rect=canvas.getBoundingClientRect(),w=Math.max(300,Math.floor(rect.width)),h=270,dpr=window.devicePixelRatio||1;canvas.width=w*dpr;canvas.height=h*dpr;let ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);let data=examList();if(!data.length){ctx.font="14px system-ui";ctx.fillText("Save your first exam result to see the graph.",18,35);return}let pad={l:38,r:18,t:20,b:38},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;ctx.strokeStyle="#d9dee8";ctx.lineWidth=1;[0,180,360,540,720].forEach(v=>{let y=pad.t+ph-(v/720)*ph;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillStyle="#667085";ctx.font="11px system-ui";ctx.fillText(v,pad.l-28,y+4)});let pts=data.map((x,i)=>({x:pad.l+(data.length===1?pw/2:(i/(data.length-1))*pw),y:pad.t+ph-(x.m.total/720)*ph}));ctx.strokeStyle="#3159b7";ctx.lineWidth=3;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();pts.forEach((p,i)=>{ctx.fillStyle="#3159b7";ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();ctx.fillStyle="#172033";ctx.font="10px system-ui";ctx.fillText(data[i].e[0],Math.max(2,p.x-18),h-12);ctx.fillText(data[i].m.total,p.x-12,p.y-9)});$("ccChartNote").textContent=data.length+" exam"+(data.length===1?"":"s")+" recorded"} function renderAllenScoreChart(){let canvas=$("allenScoreChart");if(!canvas)return;let rect=canvas.getBoundingClientRect(),w=Math.max(300,Math.floor(rect.width)),h=270,dpr=window.devicePixelRatio||1;canvas.width=w*dpr;canvas.height=h*dpr;let ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);let data=Object.values(allenRecords||{}).filter(hasAllenResult).sort((a,b)=>(a.exam_date||"").localeCompare(b.exam_date||"")||(a.name||"").localeCompare(b.name||""));if(!data.length){ctx.font="14px system-ui";ctx.fillText("Save your first Allen result to see the graph.",18,35);$("allenChartNote").textContent="No results yet";return}let pad={l:38,r:18,t:20,b:38},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;ctx.strokeStyle="#d9dee8";ctx.lineWidth=1;[0,180,360,540,720].forEach(v=>{let y=pad.t+ph-(v/720)*ph;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillStyle="#667085";ctx.font="11px system-ui";ctx.fillText(v,pad.l-28,y+4)});let pts=data.map((r,i)=>{let m=allenMetrics(r);return {x:pad.l+(data.length===1?pw/2:(i/(data.length-1))*pw),y:pad.t+ph-(m.total/720)*ph,m}});ctx.strokeStyle="#198754";ctx.lineWidth=3;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();pts.forEach((p,i)=>{ctx.fillStyle="#198754";ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();ctx.fillStyle="#172033";ctx.font="10px system-ui";let label=(data[i].name||"Allen").slice(0,16);ctx.fillText(label,Math.max(2,p.x-22),h-12);ctx.fillText(p.m.total,p.x-12,p.y-9)});$("allenChartNote").textContent=data.length+" exam"+(data.length===1?"":"s")+" recorded"}
 
-function renderCommandCenter(){let left=trackerEndDays();$("ccDays").textContent=left;$("ccCountdownLabel").textContent="days left in your tracker window (through Apr 30, 2027)";let st=calcStreak();$("ccStreak").textContent=st.streak+" day"+(st.streak===1?"":"s");$("ccBestStreak").textContent="Best: "+st.best+" days";let data=examList();$("ccProgressDays").textContent=Object.keys(records).filter(k=>valid(k)&&dayCompletion(k)>0).length+" / 242";if(data.length){let vals=data.map(x=>x.m.total);$("ccAvg").textContent=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);$("ccBest").textContent=Math.max(...vals);$("ccLatest").textContent=data[data.length-1].m.total}else{$("ccAvg").textContent=$("ccBest").textContent=$("ccLatest").textContent="—"}let subjects=[["Physics","physics",180],["Chemistry","chemistry",180],["Botany","botany",180],["Zoology","zoology",180]];$("ccSubjects").innerHTML=subjects.map(([name,key,max])=>{let vals=data.map(x=>({score:x.m.scores[subjects.findIndex(s=>s[1]===key)],c:x.r[key+"_correct"]||0,w:x.r[key+"_wrong"]||0}));let scores=vals.map(x=>x.score);let avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null;let best=scores.length?Math.max(...scores):null;let attempted=vals.reduce((a,b)=>a+b.c+b.w,0),correct=vals.reduce((a,b)=>a+b.c,0),acc=attempted?correct/attempted*100:null;return '<div class="subjectStat"><div class="muted">'+name+'</div><strong>'+(avg??"—")+'</strong><div class="muted">Avg / '+max+' • Best '+(best??"—")+'</div><div class="muted">Accuracy '+(acc!=null?acc.toFixed(1)+"%":"—")+'</div></div>'}).join("");let hm=$("ccHeatmap");hm.innerHTML="";for(let i=0;i<242;i++){let d=shift(MIN,i),n=dayCompletion(d),e=document.createElement("div");e.className="heatCell"+(n?(" p"+Math.min(5,Math.ceil(n/13*5))):"");e.title=d+" • "+n+"/13 completed";hm.append(e)}let saved=loadMainTargets();["Physics","Chemistry","Biology","Total"].forEach(k=>{let el=$("target"+k);if(el&&saved[k]!=null)el.value=saved[k]});renderScoreChart()}
+function renderMBBSMountain(){
+  let el=$("mountainClimber"),scoreEl=$("mountainScore"),status=$("mountainStatus");
+  if(!el||!scoreEl||!status)return;
+  let items=[];
+  examList().forEach(x=>items.push({date:x.e[1],name:x.e[0],score:x.m.total,source:"Aakash"}));
+  allenCompleted().forEach(x=>items.push({date:x.exam_date||"",name:x.name||"Allen",score:allenMetrics(x).total,source:"Allen"}));
+  items=items.filter(x=>Number.isFinite(Number(x.score))).sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.name||"").localeCompare(b.name||""));
+  let targetData=loadMainTargets(),target=Number(targetData.Total)||720;
+  target=Math.max(1,Math.min(720,target));
+  if(!items.length){
+    scoreEl.textContent="— / "+target;
+    status.textContent="Save a mock-test result to start climbing.";
+    el.setAttribute("transform","translate(0 0)");
+    return;
+  }
+  let latest=items[items.length-1],prev=items.length>1?items[items.length-2]:null;
+  let score=Number(latest.score)||0,pct=Math.max(0,Math.min(1,score/target));
+  let x=82+(405-82)*pct,y=304+(65-304)*pct;
+  el.setAttribute("transform","translate("+(x-82).toFixed(1)+" "+(y-304).toFixed(1)+")");
+  scoreEl.textContent=score+" / "+target;
+  if(!prev){
+    status.textContent=latest.source+" • "+latest.name+" • First climb: "+score+" points";
+  }else{
+    let diff=score-Number(prev.score||0);
+    status.textContent=latest.source+" • "+latest.name+" • "+(diff>0?"↑ "+diff+" points — you climbed higher! 🔥":diff<0?"↓ "+Math.abs(diff)+" points — you came down. Climb back. 💪":"→ Same score — hold your ground. ⛰️");
+    el.classList.remove("up","down");void el.offsetWidth;el.classList.add(diff>0?"up":diff<0?"down":"");
+  }
+}
+function renderCommandCenter(){let left=trackerEndDays();$("ccDays").textContent=left;$("ccCountdownLabel").textContent="days left in your tracker window (through Apr 30, 2027)";let st=calcStreak();$("ccStreak").textContent=st.streak+" day"+(st.streak===1?"":"s");$("ccBestStreak").textContent="Best: "+st.best+" days";let data=examList();$("ccProgressDays").textContent=Object.keys(records).filter(k=>valid(k)&&dayCompletion(k)>0).length+" / 242";if(data.length){let vals=data.map(x=>x.m.total);$("ccAvg").textContent=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);$("ccBest").textContent=Math.max(...vals);$("ccLatest").textContent=data[data.length-1].m.total}else{$("ccAvg").textContent=$("ccBest").textContent=$("ccLatest").textContent="—"}let subjects=[["Physics","physics",180],["Chemistry","chemistry",180],["Botany","botany",180],["Zoology","zoology",180]];$("ccSubjects").innerHTML=subjects.map(([name,key,max])=>{let vals=data.map(x=>({score:x.m.scores[subjects.findIndex(s=>s[1]===key)],c:x.r[key+"_correct"]||0,w:x.r[key+"_wrong"]||0}));let scores=vals.map(x=>x.score);let avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null;let best=scores.length?Math.max(...scores):null;let attempted=vals.reduce((a,b)=>a+b.c+b.w,0),correct=vals.reduce((a,b)=>a+b.c,0),acc=attempted?correct/attempted*100:null;return '<div class="subjectStat"><div class="muted">'+name+'</div><strong>'+(avg??"—")+'</strong><div class="muted">Avg / '+max+' • Best '+(best??"—")+'</div><div class="muted">Accuracy '+(acc!=null?acc.toFixed(1)+"%":"—")+'</div></div>'}).join("");let hm=$("ccHeatmap");hm.innerHTML="";for(let i=0;i<242;i++){let d=shift(MIN,i),n=dayCompletion(d),e=document.createElement("div");e.className="heatCell"+(n?(" p"+Math.min(5,Math.ceil(n/13*5))):"");e.title=d+" • "+n+"/13 completed";hm.append(e)}let saved=loadMainTargets();["Physics","Chemistry","Biology","Total"].forEach(k=>{let el=$("target"+k);if(el&&saved[k]!=null)el.value=saved[k]});renderScoreChart();if(typeof renderMBBSMountain==="function")renderMBBSMountain()}
 function loadMainTargets(){try{return JSON.parse(localStorage.getItem("neet27_targets")||"{}")}catch(e){return {}}}
 function saveMainTargets(){let ids=[["Physics","targetPhysics",180],["Chemistry","targetChemistry",180],["Biology","targetBiology",360],["Total","targetTotal",720]],t={};for(let [key,id,max] of ids){let el=$(id),v=el?Number(el.value):0;if(!Number.isFinite(v)||v<0||v>max){$("targetMsg").textContent=key+" must be 0–"+max;return}t[key]=Math.round(v)}localStorage.setItem("neet27_targets",JSON.stringify(t));$("targetMsg").textContent="Targets saved ✓";renderCommandCenter();renderTargetDistance();setTimeout(()=>{if($("targetMsg"))$("targetMsg").textContent=""},1800)}
 function initTargetButtons(){let b=$("saveTargets");if(b){b.onclick=null;b.addEventListener("click",saveMainTargets)}let t=loadMainTargets();["Physics","Chemistry","Biology","Total"].forEach(k=>{let el=$("target"+k);if(el&&t[k]!=null)el.value=t[k]})}
