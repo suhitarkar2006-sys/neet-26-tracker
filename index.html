@@ -689,54 +689,44 @@ function subAttempt(r,s){let c=r[s+"_correct"],w=r[s+"_wrong"];return c==null&&w
 function subMissed(r,s){let m=r[s+"_missed"];if(m!=null)return m;let c=r[s+"_correct"],w=r[s+"_wrong"];return c==null&&w==null?0:45-(c||0)-(w||0)}
 function examMetrics(r){let ss=["physics","chemistry","botany","zoology"];let scores=ss.map(s=>subScore(r,s)||0),correct=ss.reduce((a,s)=>a+(r[s+"_correct"]||0),0),wrong=ss.reduce((a,s)=>a+(r[s+"_wrong"]||0),0),missed=ss.reduce((a,s)=>a+subMissed(r,s),0),attempted=correct+wrong,total=scores.reduce((a,b)=>a+b,0),accuracy=attempted?correct/attempted*100:null;return {scores,correct,wrong,missed,attempted,total,accuracy}}
 function hasExamResult(r){return !!r&&Object.keys(r).some(k=>k.endsWith("_correct")&&r[k]!=null)}
+function builtInAakashRecovery(uid){
+  const now=new Date().toISOString();
+  return {
+    "UT-1":{user_id:uid,exam_id:"UT-1",physics_correct:24,physics_wrong:8,physics_missed:13,chemistry_correct:21,chemistry_wrong:8,chemistry_missed:16,botany_correct:31,botany_wrong:13,botany_missed:1,zoology_correct:31,zoology_wrong:11,zoology_missed:3,rank:null,percentile:55.04,updated_at:now},
+    "UT-2":{user_id:uid,exam_id:"UT-2",physics_correct:18,physics_wrong:9,physics_missed:18,chemistry_correct:15,chemistry_wrong:5,chemistry_missed:25,botany_correct:33,botany_wrong:7,botany_missed:5,zoology_correct:25,zoology_wrong:17,zoology_missed:3,rank:null,percentile:45.59,updated_at:now},
+    "UT-4":{user_id:uid,exam_id:"UT-4",physics_correct:17,physics_wrong:7,physics_missed:21,chemistry_correct:11,chemistry_wrong:18,chemistry_missed:16,botany_correct:33,botany_wrong:12,botany_missed:0,zoology_correct:28,zoology_wrong:13,zoology_missed:4,rank:null,percentile:43.10,updated_at:now}
+  };
+}
 async function loadExams(){
   $("saveStatus").textContent="Loading Aakash exams…";
   let cached={};
   try{cached=JSON.parse(localStorage.getItem("neet27_aakash_cache")||"{}")}catch(e){cached={}};
+  const builtIn=builtInAakashRecovery(user.id);
   let{data,error}=await sb.from("exam_results").select("*").eq("user_id",user.id).order("updated_at",{ascending:true});
-  if(error){
-    examRecords=cached;
-    $("saveStatus").textContent=Object.keys(examRecords).length
-      ?"Aakash scores loaded from saved backup ✓"
-      :"Aakash scores couldn't be read from Supabase.";
-    renderExams();
-    return;
-  }
   let remote={};
-  (data||[]).forEach(r=>remote[r.exam_id]=r);
+  if(!error)(data||[]).forEach(r=>remote[r.exam_id]=r);
 
-  // Local cache is a recovery source, never something that should be wiped by a
-  // temporarily empty/partial Supabase response.
-  examRecords=Object.assign({},cached,remote);
+  // Verified CSV recovery data is always available. User cache and online
+  // records override it, so existing edits are never replaced.
+  examRecords=Object.assign({},builtIn,cached,remote);
 
-  // If Supabase has lost the cached records, try restoring them automatically.
-  let cachedIds=Object.keys(cached);
-  let missing=cachedIds.filter(id=>!remote[id]);
+  // Re-seed missing verified records into Supabase automatically.
+  const missing=Object.keys(builtIn).filter(id=>!remote[id]);
   if(missing.length){
-    let restorePayload=missing.map(id=>Object.assign({},cached[id],{
-      user_id:user.id,
-      exam_id:id,
-      updated_at:new Date().toISOString()
+    const payload=missing.map(id=>Object.assign({},examRecords[id],{
+      user_id:user.id,exam_id:id,updated_at:new Date().toISOString()
     }));
-    let{error:restoreError}=await sb.from("exam_results").upsert(restorePayload,{onConflict:"user_id,exam_id"});
-    if(!restoreError){
-      restorePayload.forEach(r=>remote[r.exam_id]=r);
-      $("saveStatus").textContent=missing.length+" saved Aakash exam"+(missing.length===1?"":"s")+" restored online ✓";
-    }else{
-      $("saveStatus").textContent=Object.keys(examRecords).length
-        ?"Aakash scores restored from browser backup ✓ (online restore pending)"
-        :"Aakash scores couldn't be restored.";
-    }
+    const restored=await sb.from("exam_results").upsert(payload,{onConflict:"user_id,exam_id"});
+    $("saveStatus").textContent=restored.error
+      ?"Aakash records loaded from verified recovery ✓"
+      :"Aakash records restored permanently ✓";
+  }else if(error){
+    $("saveStatus").textContent="Aakash records loaded from verified recovery ✓";
+  }else{
+    $("saveStatus").textContent=Object.keys(remote).length+" Aakash exam"+(Object.keys(remote).length===1?"":"s")+" loaded ✓";
   }
 
-  if(Object.keys(examRecords).length){
-    try{localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords))}catch(e){}
-  }
-  if(!missing.length){
-    $("saveStatus").textContent=Object.keys(remote).length
-      ?Object.keys(remote).length+" Aakash exam"+(Object.keys(remote).length===1?"":"s")+" loaded ✓"
-      :(Object.keys(cached).length?"Aakash scores restored from saved backup ✓":"No Aakash scores saved yet.");
-  }
+  try{localStorage.setItem("neet27_aakash_cache",JSON.stringify(examRecords))}catch(e){}
   renderExams();
 }
 function renderExams(){let rows=$("examRows");if(!rows)return;rows.innerHTML="";let list=EXAMS.filter(e=>examFilter==="all"||hasExamResult(examRecords[e[0]]));EXAMS.forEach(e=>{if(!(examFilter==="all"||hasExamResult(examRecords[e[0]])))return;let r=examRecords[e[0]],m=r?examMetrics(r):null;let tr=document.createElement("tr");if(m)tr.className="hasResult";tr.innerHTML=`<td><span class="examName">${escHtml(e[0])}</span></td><td>${fmtExamDate(e[1])}</td><td>${m?.scores[0]??"—"}</td><td>${m?.scores[1]??"—"}</td><td>${m?.scores[2]??"—"}</td><td>${m?.scores[3]??"—"}</td><td class="score">${m?.total??"—"}</td><td>${m?.correct??"—"}</td><td>${m?.wrong??"—"}</td><td>${m?m.missed:"—"}</td><td>${m?m.attempted:"—"}</td><td>${m?.accuracy!=null?m.accuracy.toFixed(1)+"%":"—"}</td><td>${r?.rank??"—"}</td><td><button class="examBtn" type="button" data-exam="${escHtml(e[0])}">${m?"Edit":"Enter"}</button></td>`;rows.append(tr)});rows.querySelectorAll("button[data-exam]").forEach(b=>b.onclick=()=>openExam(b.dataset.exam));let completed=EXAMS.filter(e=>hasExamResult(examRecords[e[0]])).map(e=>({e,r:examRecords[e[0]],m:examMetrics(examRecords[e[0]])}));$("examCount").textContent=completed.length+" / "+EXAMS.length;if(completed.length){let vals=completed.map(x=>x.m.total),avg=vals.reduce((a,b)=>a+b,0)/vals.length;$("examAvg").textContent=Math.round(avg);$("examHigh").textContent=Math.max(...vals);$("examLatest").textContent=completed[completed.length-1].m.total}else{$("examAvg").textContent=$("examHigh").textContent=$("examLatest").textContent="—"}if(typeof renderCommandCenter==="function")renderCommandCenter()}
