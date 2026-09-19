@@ -115,8 +115,58 @@ body{background-color:#eef2f8;background-image:radial-gradient(circle at 12% 8%,
 .nightTheme .calendar .day{background:rgba(17,29,49,.35)!important;border-color:rgba(83,105,140,.45)!important}
 .nightTheme .calendar .day.done{background:rgba(22,60,41,.50)!important}
 .nightTheme .calendar .day.partial{background:rgba(105,83,24,.38)!important}
+</style><style id="journey-animation-system">
+/* NEET Journey animation system */
+@keyframes journeyCheck{0%{transform:scale(.72);opacity:.5}55%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
+@keyframes rowComplete{0%{box-shadow:inset 0 0 0 rgba(49,89,183,0)}45%{box-shadow:inset 5px 0 0 #3159b7}100%{box-shadow:inset 0 0 0 rgba(49,89,183,0)}}
+@keyframes progressSweep{0%{background-position:-120px 0}100%{background-position:220px 0}}
+@keyframes streakPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+@keyframes dayPop{0%{transform:scale(.82);opacity:.55}65%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes badgeUnlock{0%{transform:scale(.65) rotate(-5deg);opacity:0}65%{transform:scale(1.12) rotate(2deg)}100%{transform:scale(1);opacity:1}}
+@keyframes sparkle{0%{opacity:0;transform:scale(.2) translateY(6px)}35%{opacity:1}100%{opacity:0;transform:scale(1.2) translateY(-14px)}}
+@keyframes scoreCount{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes targetHit{0%{box-shadow:0 0 0 rgba(49,89,183,0)}45%{box-shadow:0 0 28px rgba(49,89,183,.32)}100%{box-shadow:0 0 0 rgba(49,89,183,0)}}
+@keyframes timerBreath{0%,100%{box-shadow:0 14px 38px rgba(20,40,80,.10)}50%{box-shadow:0 16px 44px rgba(49,89,183,.20)}}
+@keyframes revealUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes starDrift{from{transform:translate3d(0,0,0)}50%{transform:translate3d(12px,-10px,0)}to{transform:translate3d(0,0,0)}}
+@keyframes dreamText{from{opacity:0;transform:translateY(10px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@keyframes openingFade{0%{opacity:1}78%{opacity:1}100%{opacity:0;visibility:hidden;pointer-events:none}}
+@keyframes openingLogo{0%{opacity:0;transform:scale(.72) translateY(12px)}55%{opacity:1;transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
+@keyframes openingLine{0%{width:0;opacity:0}55%{opacity:1}100%{width:180px;opacity:1}}
+@keyframes openingGlow{0%,100%{transform:scale(.85);opacity:.25}50%{transform:scale(1.12);opacity:.6}}
+.openingScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,rgba(73,112,195,.18),transparent 32%),linear-gradient(135deg,#071225,#102448 55%,#071225);color:#fff;animation:openingFade 2.15s ease forwards}
+.openingGlow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(120,166,255,.30),transparent 68%);filter:blur(5px);animation:openingGlow 2s ease-in-out infinite}
+.openingInner{position:relative;text-align:center;z-index:1}
+.openingLogo{width:82px;height:82px;object-fit:cover;border-radius:22px;box-shadow:0 14px 50px rgba(0,0,0,.35);animation:openingLogo 1s cubic-bezier(.22,1,.36,1) both}
+.openingTitle{margin:18px 0 4px;font-size:27px;font-weight:900;letter-spacing:-.03em;animation:openingLogo 1s .15s both}
+.openingSub{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#b9c9e8;animation:openingLogo 1s .28s both}
+.openingLine{height:2px;margin:18px auto 0;background:rgba(255,255,255,.75);animation:openingLine 1.2s .35s ease both}
+.row.justCompleted{animation:rowComplete .7s ease}
+.row.justCompleted input{animation:journeyCheck .42s cubic-bezier(.22,1,.36,1)}
+.progress .fill.sweeping,.targetProgress i.sweeping{background-image:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);background-size:120px 100%;animation:progressSweep .7s ease}
+.ccStreakPulse{animation:streakPulse .65s ease}
+.day.justCompleted{animation:dayPop .5s cubic-bezier(.22,1,.36,1)}
+.badge.newUnlock{animation:badgeUnlock .65s cubic-bezier(.22,1,.36,1);position:relative}
+.badge.newUnlock:after{content:"✦";position:absolute;right:-3px;top:-7px;font-size:13px;animation:sparkle .8s ease}
+.examScoreChanged{animation:scoreCount .45s ease}
+.targetReached{animation:targetHit 1.2s ease}
+.timerActiveGlow{animation:timerBreath 2.6s ease-in-out infinite}
+.scrollReveal{opacity:0;transform:translateY(22px)}
+.scrollReveal.revealed{animation:revealUp .65s cubic-bezier(.22,1,.36,1) both}
+.dreamMode:before,.dreamMode:after{content:"";position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:12vw 8vh #fff,28vw 24vh #fff,42vw 12vh #fff,64vw 30vh #fff,78vw 14vh #fff,90vw 42vh #fff,18vw 72vh #fff,55vw 82vh #fff,84vw 76vh #fff;opacity:.55;animation:starDrift 7s ease-in-out infinite}
+.dreamMode:after{animation-delay:-3.5s;opacity:.3}
+.dreamBox h2,.dreamBox p,.dreamQuote{animation:dreamText .8s .12s both}
+@media(prefers-reduced-motion:reduce){.openingScreen{animation:none;display:none}.scrollReveal{opacity:1;transform:none}}
 </style></head>
-<body>
+<body><div class="openingScreen" id="openingScreen" aria-label="NEET 2027 loading">
+  <div class="openingGlow"></div>
+  <div class="openingInner">
+    <img class="openingLogo" src="favicon.png" alt="">
+    <div class="openingTitle">NEET 2027 • COMMAND CENTER</div>
+    <div class="openingSub">Build the future. One day at a time.</div>
+    <div class="openingLine"></div>
+  </div>
+</div>
 <div id="auth" class="auth"><h2>NEET 27 Tracker</h2><p class="muted">Your checklist syncs online across devices.</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password (6+ characters)"><button id="signup" class="primary">Create account</button><button id="signin">Sign in</button><button id="forgot" type="button">Forgot password?</button><div id="resetBox" class="hidden"><p class="muted" style="margin-bottom:8px">Choose a new password</p><input id="newPassword" type="password" placeholder="New password (6+ characters)"><button id="updatePassword" class="primary">Set new password</button><button id="cancelReset" type="button">Cancel</button></div><div id="authMsg" class="msg"></div></div>
 <div id="app" class="app hidden"><div class="motivationSticker" aria-label="Motivational note"><img src="aiims-sticker.svg" alt="Someday, this won't be a dream. It'll be Dr. Suhit Sarkar, AIIMS Rishikesh."></div><header class="dashboardHero"><div class="heroIdentity"><div class="heroEyebrow">🩺 NEET 2027 • COMMAND CENTER</div><h1>Dr. Suhit Sarkar</h1><div class="heroSub">Daily Tracker <span>•</span> September 1, 2026 → April 30, 2027</div></div><div class="heroActions"><div class="heroAccount"><span id="userEmail" class="muted"></span></div><button id="logout" class="heroLogout">Log out</button></div></header>
 
@@ -268,4 +318,21 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
   if(target==="top"){window.scrollTo({top:0,behavior:"smooth"});return}
   document.getElementById(target)?.scrollIntoView({behavior:"smooth",block:"start"});
 }));
+</script><script id="journey-animation-js">
+(function(){
+  window.addEventListener("load",function(){
+    setTimeout(function(){document.getElementById("openingScreen")?.remove()},2350);
+    document.querySelectorAll(".commandCenter > *, .studyTimer, .examSection, .futureDoctor, .upgradeCard").forEach(function(el){
+      el.classList.add("scrollReveal");
+    });
+    if("IntersectionObserver" in window){
+      const io=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add("revealed");io.unobserve(e.target)}});
+      },{threshold:.12});
+      document.querySelectorAll(".scrollReveal").forEach(function(el){io.observe(el)});
+    }else document.querySelectorAll(".scrollReveal").forEach(el=>el.classList.add("revealed"));
+  });
+  window.journeyAnimateProgress=function(el){if(!el)return;el.classList.remove("sweeping");void el.offsetWidth;el.classList.add("sweeping");setTimeout(()=>el.classList.remove("sweeping"),750)};
+  window.journeyAnimateElement=function(el,cls){if(!el)return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);};
+})();
 </script></body></html>
