@@ -743,12 +743,13 @@ if(configured){sb.auth.getSession().then(({data})=>start(data.session));sb.auth.
 
 let studyData={total_seconds:0,active_started_at:null,active_elapsed_before:0,active_date:null,history:[]};let studyTick=null;
 function formatStudy(sec){sec=Math.max(0,Math.floor(sec));let h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
-function studyToday(){return new Date().toISOString().slice(0,10)}
+function localStudyDate(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function studyToday(){return localStudyDate()}
 function studyMetaKey(){return "neet27_study_active_date_"+(user&&user.id?user.id:"unknown")}
 function readStudyActiveDate(){try{return localStorage.getItem(studyMetaKey())||null}catch(e){return null}}
 function writeStudyActiveDate(d){try{localStorage.setItem(studyMetaKey(),d)}catch(e){}}
-function studyDayOf(isoTime){return isoTime?new Date(isoTime).toISOString().slice(0,10):null}
-function secondsUntilMidnight(isoTime){let d=new Date(isoTime);let next=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+1));return Math.max(0,Math.floor((next-d)/1000))}
+function studyDayOf(isoTime){return isoTime?localStudyDate(new Date(isoTime)):null}
+function secondsUntilMidnight(isoTime){let d=new Date(isoTime),next=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);return Math.max(0,Math.floor((next-d)/1000))}
 function currentStudySeconds(){
   if(!studyData.active_started_at)return studyData.active_elapsed_before||0;
   let start=new Date(studyData.active_started_at),now=Date.now(),today=studyToday();
