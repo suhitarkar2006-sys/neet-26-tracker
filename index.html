@@ -707,8 +707,32 @@ const iso=x=>x.toISOString().slice(0,10), valid=d=>d>=MIN&&d<=MAX;
 function fmt(d){let[y,m,day]=d.split("-").map(Number);return new Intl.DateTimeFormat("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(Date.UTC(y,m-1,day)))}
 function shift(d,n){let[y,m,day]=d.split("-").map(Number),x=new Date(Date.UTC(y,m-1,day));x.setUTCDate(x.getUTCDate()+n);return iso(x)}
 function state(d){return records[d]||Array(13).fill(false)}
-async function load(){let{data,error}=await sb.from("daily_checklist").select("date,checks").eq("user_id",user.id);if(error){$("saveStatus").textContent="Sync error";return}records={};(data||[]).forEach(r=>records[r.date]=r.checks)}
-async function save(d,s){records[d]=s;$("saveStatus").textContent="Saving…";let{error}=await sb.from("daily_checklist").upsert({user_id:user.id,date:d,checks:s},{onConflict:"user_id,date"});$("saveStatus").textContent=error?"Sync error":"Saved online ✓";render()}
+function dailyCacheKey(){return "neet27_daily_cache_"+(user&&user.id?user.id:"unknown")}
+function readDailyCache(){try{return JSON.parse(localStorage.getItem(dailyCacheKey())||"{}")}catch(e){return {}}}
+function writeDailyCache(){try{localStorage.setItem(dailyCacheKey(),JSON.stringify(records))}catch(e){}}
+async function load(){
+  const cached=readDailyCache();
+  let{data,error}=await sb.from("daily_checklist").select("date,checks").eq("user_id",user.id);
+  const remote={};
+  if(!error)(data||[]).forEach(r=>remote[r.date]=r.checks);
+  // Keep the local per-account backup as a fallback, while online data wins
+  // whenever the server successfully returns a record.
+  records=Object.assign({},cached,remote);
+  if(error){
+    $("saveStatus").textContent=Object.keys(cached).length?"Loaded saved days from device backup ✓":"Sync error";
+  }else{
+    writeDailyCache();
+    $("saveStatus").textContent="Daily tracker synced ✓";
+  }
+}
+async function save(d,s){
+  records[d]=s;
+  writeDailyCache();
+  $("saveStatus").textContent="Saving…";
+  let{error}=await sb.from("daily_checklist").upsert({user_id:user.id,date:d,checks:s},{onConflict:"user_id,date"});
+  $("saveStatus").textContent=error?"Saved on this device; online sync failed":"Saved online ✓";
+  render()
+}
 function render(){let d=date.value,s=state(d),n=s.filter(Boolean).length,p=Math.round(n/13*100);$("dayName").textContent=fmt(d);$("done").textContent=n+" / 13";$("pct").textContent=p+"%";let tracked=Object.keys(records).filter(k=>valid(k)&&state(k).some(Boolean)).length;$("overall").textContent=tracked+" / 242";$("fill").style.width=Math.round(tracked/242*100)+"%";$("tasks").innerHTML="";TASKS.forEach((t,i)=>{let row=document.createElement("label");row.className="row"+(s[i]?" done":"");let cb=document.createElement("input");cb.type="checkbox";cb.checked=!!s[i];let sp=document.createElement("span");sp.className="task"+(s[i]?" done":"");sp.textContent=t;cb.onchange=()=>{s[i]=cb.checked;save(d,s)};row.append(cb,sp);$("tasks").append(row)});renderCalendar();if(typeof renderCommandCenter==="function")renderCommandCenter()}
 function renderCalendar(){let y=monthCursor.getUTCFullYear(),m=monthCursor.getUTCMonth();$("monthTitle").textContent=new Intl.DateTimeFormat("en-IN",{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(Date.UTC(y,m,1)));let g=$("calendar");g.innerHTML="";["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(x=>{let e=document.createElement("div");e.className="dow";e.textContent=x;g.append(e)});let first=new Date(Date.UTC(y,m,1)).getUTCDay(),days=new Date(Date.UTC(y,m+1,0)).getUTCDate();for(let i=0;i<first;i++){let e=document.createElement("div");e.className="day empty";g.append(e)}for(let day=1;day<=days;day++){let d=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`,n=state(d).filter(Boolean).length,e=document.createElement("button");e.className="day"+(n===13?" done":n?" partial":"")+(d===date.value?" selected":"");e.textContent=day;e.disabled=!valid(d);e.onclick=()=>{date.value=d;render()};g.append(e)}}
 async function start(session){user=session?.user||null;if(!user){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}$("auth").classList.add("hidden");$("app").classList.remove("hidden");$("userEmail").textContent=user.email||"";await load();render();await loadStudyTimer();await loadExams();await loadAllenExams();renderCommandCenter()}
