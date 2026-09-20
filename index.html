@@ -531,6 +531,41 @@ body.loginVideoMode #auth>*{position:relative;z-index:1}
 body.videoBackgroundMode #app,body.videoBackgroundMode .app{position:relative;z-index:2}
 @media(max-width:700px){body.loginVideoMode #auth{margin:28px auto}}
 @media(prefers-reduced-motion:reduce){#loginVideoBg,#loginVideo2{transition:none!important}}
+</style><style id="glass-transparency-update">
+/* More transparent glass cards — content remains readable */
+.card,.ccCard,.timerCard,.upgradeCard{
+  background:rgba(255,255,255,.54)!important;
+  border-color:rgba(255,255,255,.56)!important;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.futureDoctorCard{
+  background:linear-gradient(135deg,rgba(255,255,255,.60),rgba(235,243,255,.48))!important;
+  border-color:rgba(255,255,255,.58)!important;
+}
+.dashboardHero{
+  background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(238,244,255,.48))!important;
+  border-color:rgba(255,255,255,.60)!important;
+}
+.examTable{
+  background:rgba(255,255,255,.52)!important;
+  border-color:rgba(255,255,255,.56)!important;
+}
+.examTable th{background:rgba(255,255,255,.34)!important}
+.panel,.calendar{
+  background:rgba(255,255,255,.50)!important;
+  border-color:rgba(255,255,255,.58)!important;
+}
+.subjectBox,.resultMini,.subjectStat{
+  background:rgba(255,255,255,.40)!important;
+  border-color:rgba(255,255,255,.52)!important;
+}
+.record{
+  background:rgba(248,250,252,.54)!important;
+}
+.badge{
+  background:rgba(255,255,255,.48)!important;
+}
 </style></head>
 <body><div id="loginVideoBg" aria-hidden="true">
 <img id="loginBgImage" src="aiims-background.jpg" alt="">
