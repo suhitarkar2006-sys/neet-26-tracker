@@ -665,7 +665,7 @@ button,.btn{border-radius:12px!important;font-weight:750!important;transition:tr
 .sectionModal{background:rgba(15,23,42,.58)!important;backdrop-filter:blur(7px)!important;-webkit-backdrop-filter:blur(7px)!important}
 .sectionModalBox{background:linear-gradient(145deg,rgba(248,250,255,.96),rgba(239,244,252,.90))!important;border:1px solid rgba(255,255,255,.98)!important;box-shadow:0 30px 100px rgba(15,23,42,.36)!important}
 @media(max-width:700px){.app{padding:18px 12px 44px!important}.dashboardHero{padding:22px 18px!important;border-radius:22px!important}.card,.ccCard,.timerCard,.upgradeCard{border-radius:18px!important}.homeMenuCard{min-height:104px!important}}
-</style></head>
+</style><style id="ultra-performance">body:before,body:after{animation:none!important;filter:none!important}.app:before{display:none!important}.scrollReveal,.scrollReveal.revealed,.motionReveal,.motionReveal.motionVisible{opacity:1!important;transform:none!important;transition:none!important;animation:none!important}.timerActiveGlow{animation:none!important}.card,.ccCard,.timerCard,.upgradeCard,.futureDoctorCard,.dashboardHero,.panel,.calendar,.examTable,.homeMenuCard,.sectionModalBox{backdrop-filter:blur(5px)!important;-webkit-backdrop-filter:blur(5px)!important}.card:before,.ccCard:before,.timerCard:before,.upgradeCard:before,.futureDoctorCard:before,.dashboardHero:before{animation:none!important}@media(max-width:700px){.card,.ccCard,.timerCard,.upgradeCard,.futureDoctorCard,.dashboardHero,.panel,.calendar,.examTable,.homeMenuCard,.sectionModalBox{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.card,.ccCard,.timerCard,.upgradeCard,.futureDoctorCard,.dashboardHero{box-shadow:0 6px 20px rgba(15,23,42,.10)!important}}</style></head>
 <body><div id="loginVideoBg" aria-hidden="true">
 <img id="loginBgImage" src="aiims-background.jpg" alt="">
 <video id="loginVideo2" muted playsinline preload="auto"></video>
@@ -1199,7 +1199,7 @@ function renderOneMore(){let n=dayCompletion(iso(new Date())),el=$("oneMoreCard"
 function allenCompleted(){return Object.values(allenRecords||{}).filter(hasAllenResult).sort((a,b)=>(a.exam_date||"").localeCompare(b.exam_date||"")||(a.name||"").localeCompare(b.name||""))}
 function renderAllenStats(){let data=allenCompleted(),target=Number(localStorage.getItem("neet27_allen_target")||0);if($("allenTargetInput"))$("allenTargetInput").value=target?String(target):"";if(!data.length){$("allenSubjects").innerHTML='<div class="muted">Save Allen results to see subject statistics.</div>';$("allenWeakAreas").textContent="Enter Allen results to unlock this.";["allenRecordBestScore","allenRecordBestPhysics","allenRecordBestChemistry","allenRecordBestBiology"].forEach(id=>$(id).textContent="—");$("allenTargetDistance").textContent=target?target+" points":"Set a target";$("allenTargetDistanceText").textContent=target?"Target: "+target+" / 720 • Waiting for first saved exam.":"Enter an Allen total target above.";$("allenTargetDistanceBar").style.width="0%";$("allenBadgeRow").innerHTML='<span class="badge locked">🏆 First Allen Exam</span><span class="badge locked">🚀 500+ Club</span><span class="badge locked">⚡ 600+ Club</span><span class="badge locked">👑 700+ Club</span>';return}let subjects=[["Physics","physics",180],["Chemistry","chemistry",180],["Biology","biology",360]];$("allenSubjects").innerHTML=subjects.map(([name,key,max])=>{let scores=data.map(r=>allenSubScore(r,key)||0),avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length),best=Math.max(...scores),attempted=data.reduce((a,r)=>a+(r[key+"_correct"]||0)+(r[key+"_wrong"]||0),0),correct=data.reduce((a,r)=>a+(r[key+"_correct"]||0),0),acc=attempted?correct/attempted*100:null;return '<div class="subjectStat"><div class="muted">'+name+'</div><strong>'+avg+'</strong><div class="muted">Avg / '+max+' • Best '+best+'</div><div class="muted">Accuracy '+(acc!=null?acc.toFixed(1)+"%":"—")+'</div></div>'}).join("");let avgs=subjects.map(([name,key])=>({name,avg:Math.round(data.reduce((a,r)=>a+(allenSubScore(r,key)||0),0)/data.length)})).sort((a,b)=>a.avg-b.avg);$("allenWeakAreas").innerHTML=avgs.map((x,i)=>'<div class="weakItem"><span>'+(i===0?"⚠️ ":"")+x.name+'</span><strong>'+x.avg+'</strong></div>').join("");$("allenRecordBestScore").textContent=Math.max(...data.map(r=>allenMetrics(r).total));$("allenRecordBestPhysics").textContent=Math.max(...data.map(r=>allenSubScore(r,"physics")||0))+"/180";$("allenRecordBestChemistry").textContent=Math.max(...data.map(r=>allenSubScore(r,"chemistry")||0))+"/180";$("allenRecordBestBiology").textContent=Math.max(...data.map(r=>allenSubScore(r,"biology")||0))+"/360";target=Number(localStorage.getItem("neet27_allen_target")||0),latest=allenMetrics(data[data.length-1]).total;if(!target){$("allenTargetDistance").textContent="Set a target";$("allenTargetDistanceText").textContent="Enter an Allen total target above.";$("allenTargetDistanceBar").style.width="0%"}else{let diff=target-latest,pct=Math.max(0,Math.min(100,latest/target*100));$("allenTargetDistance").textContent=diff>0?diff+" points to target":"Target reached ✓";$("allenTargetDistanceText").textContent="Latest "+latest+" / "+target+" ("+Math.round(pct)+"%)";$("allenTargetDistanceBar").style.width=pct+"%"}let badges=[["🏆 First Allen Exam",data.length>=1],["🚀 500+ Club",data.some(r=>allenMetrics(r).total>=500)],["⚡ 600+ Club",data.some(r=>allenMetrics(r).total>=600)],["👑 700+ Club",data.some(r=>allenMetrics(r).total>=700)]];$("allenBadgeRow").innerHTML=badges.map(b=>'<span class="badge '+(b[1]?"":"locked")+'">'+b[0]+"</span>").join("")}
 function renderUpgrades(){renderFutureDoctor();renderTodayYesterday();renderWeakAreas();renderStudyGoal();renderUpgradeRecords();renderTargetDistance();renderBadges();renderOneMore();if(typeof renderAllenStats==="function")renderAllenStats()}
-setInterval(()=>{renderFutureDoctor();if(typeof user!=="undefined"&&user){renderStudyGoal();renderUpgradeRecords();renderTodayYesterday();renderTargetDistance();renderBadges();renderOneMore()}},1000);setTimeout(()=>{try{renderUpgrades()}catch(e){}},700);
+setTimeout(()=>{try{renderUpgrades()}catch(e){}},700);
 function getAllenTarget(){let v=Number(localStorage.getItem("neet27_allen_target")||0);return Number.isFinite(v)?v:0}
 function saveAllenTarget(){let el=$("allenTargetInput"),raw=el?el.value.trim():"",v=Number(raw);if(!raw||!Number.isFinite(v)||v<1||v>720){$("allenTargetDistanceText").textContent="Enter a target from 1 to 720.";return}v=Math.round(v);localStorage.setItem("neet27_allen_target",String(v));el.value=String(v);renderAllenStats();$("allenTargetDistanceText").textContent=allenCompleted().length?$("allenTargetDistanceText").textContent:"Target saved: "+v+" / 720 • Waiting for first saved exam."}
 function initAllenTarget(){let b=$("saveAllenTarget");if(b){b.onclick=null;b.addEventListener("click",saveAllenTarget)}let v=getAllenTarget();if(v&&$("allenTargetInput"))$("allenTargetInput").value=String(v)}
@@ -1211,120 +1211,8 @@ document.querySelectorAll(".mobileNav [data-scroll]").forEach(btn=>btn.addEventL
   if(target==="top"){window.scrollTo({top:0,behavior:"smooth"});return}
   document.getElementById(target)?.scrollIntoView({behavior:"smooth",block:"start"});
 }));
-</script><script id="journey-animation-js">
-(function(){
-  window.addEventListener("load",function(){
-        document.querySelectorAll(".card, .panel, .calendar, .timerCard, .ccCard, .examSection, .futureDoctor, .upgradeCard, .stats .card").forEach(function(el){
-      el.classList.add("scrollReveal");
-    });
-    if("IntersectionObserver" in window){
-      const io=new IntersectionObserver(function(entries){
-        entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add("revealed");io.unobserve(e.target)}});
-      },{threshold:.12});
-      document.querySelectorAll(".scrollReveal").forEach(function(el){io.observe(el)});
-    }else document.querySelectorAll(".scrollReveal").forEach(el=>el.classList.add("revealed"));
-  });
-  window.journeyAnimateProgress=function(el){if(!el)return;el.classList.remove("sweeping");void el.offsetWidth;el.classList.add("sweeping");setTimeout(()=>el.classList.remove("sweeping"),750)};
-  window.journeyAnimateElement=function(el,cls){if(!el)return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);};
-})();
 </script>
-<script id="premium-motion-js">
-(function(){
-  function initPremiumMotion(){
-    /* Cursor-following ambient spotlight — desktop only */
-    if(window.matchMedia && window.matchMedia("(pointer:fine)").matches){
-      let raf=0;
-      document.addEventListener("pointermove",function(e){
-        if(raf)return;
-        raf=requestAnimationFrame(function(){
-          document.documentElement.style.setProperty("--spot-x",e.clientX+"px");
-          document.documentElement.style.setProperty("--spot-y",e.clientY+"px");
-          raf=0;
-        });
-      },{passive:true});
-    }
 
-    /* Add subtle reveal to major blocks not already handled by journey animation. */
-    const revealTargets=document.querySelectorAll(
-      ".dashboardHero,.stats .card,.studyTimer,.commandCenter>.ccCard,.futureDoctor,.upgradeGrid>.upgradeCard,.examSection,.allenExamSection"
-    );
-    if("IntersectionObserver" in window){
-      const io=new IntersectionObserver(function(entries){
-        entries.forEach(function(entry){
-          if(entry.isIntersecting){
-            entry.target.classList.add("motionVisible");
-            io.unobserve(entry.target);
-          }
-        });
-      },{threshold:.08});
-      revealTargets.forEach(function(el){
-        if(!el.classList.contains("motionReveal"))el.classList.add("motionReveal");
-        io.observe(el);
-      });
-    }else{
-      revealTargets.forEach(function(el){el.classList.add("motionVisible")});
-    }
-
-    /* Highlight the mobile-nav destination currently in view. */
-    const navButtons=document.querySelectorAll(".mobileNav [data-scroll]");
-    const navTargets=[...navButtons]
-      .map(b=>b.dataset.scroll)
-      .filter(id=>id!=="top")
-      .map(id=>document.getElementById(id))
-      .filter(Boolean);
-    if("IntersectionObserver" in window && navTargets.length){
-      const navIO=new IntersectionObserver(function(entries){
-        entries.forEach(function(entry){
-          if(entry.isIntersecting){
-            navButtons.forEach(function(btn){btn.classList.toggle("active",btn.dataset.scroll===entry.target.id)});
-          }
-        });
-      },{rootMargin:"-35% 0px -55% 0px",threshold:0});
-      navTargets.forEach(function(el){navIO.observe(el)});
-    }
-
-    /* Add a gentle active glow to the study timer while running. */
-    const timerValue=document.getElementById("studyTimerValue");
-    if(timerValue){
-      const timerCard=timerValue.closest(".timerCard");
-      const status=document.getElementById("studyTimerStatus");
-      const syncTimerGlow=function(){
-        const t=(status?.textContent||"").toLowerCase();
-        if(timerCard)timerCard.classList.toggle("timerActiveGlow",t.includes("running")||t.includes("resumed")||t.includes("started"));
-      };
-      if(status)new MutationObserver(syncTimerGlow).observe(status,{childList:true,subtree:true,characterData:true});
-      syncTimerGlow();
-    }
-
-    /* Give saved exam/result updates a tiny visual acknowledgement. */
-    document.addEventListener("click",function(e){
-      const id=e.target && e.target.id;
-      if(id==="saveExam"||id==="saveAllen"||id==="saveTargets"||id==="saveAllenTarget"){
-        setTimeout(function(){
-          document.querySelectorAll(".resultMini,.targetDistance,.subjectStat").forEach(function(el){
-            el.classList.remove("examScoreChanged");
-            void el.offsetWidth;
-            el.classList.add("examScoreChanged");
-          });
-        },120);
-      }
-    });
-
-    /* Keep mobile navigation polished when the user scrolls. */
-    let lastY=window.scrollY;
-    window.addEventListener("scroll",function(){
-      const nav=document.querySelector(".mobileNav");
-      if(!nav)return;
-      const y=window.scrollY;
-      nav.style.transform=(y>lastY && y>120)?"translateY(4px)":"translateY(0)";
-      lastY=y;
-    },{passive:true});
-  }
-
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initPremiumMotion);
-  else initPremiumMotion();
-})();
-</script>
 <script id="target-controls-final-fix">
 (function(){
   function q(id){return document.getElementById(id)}
